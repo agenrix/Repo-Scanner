@@ -1,31 +1,34 @@
-# Virtual Environments
-env/
-venv/
-ENV/
-.venv/
+# dependencies (bun install)
+node_modules
 
-# Database & Secret Keys
+# output
+out
+dist
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+_.log
+report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
+
+# dotenv environment variable files
 .env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
 
-# Python Bytecode and Cache
-__pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
 
-# IDE Settings
-.vscode/
-.idea/
+# IntelliJ based IDEs
+.idea
 
-# Distribution / Build
-dist/
-build/
-*.egg-info/
-
-# OS Files
+# Finder (MacOS) folder config
 .DS_Store
-Thumbs.db
-
-password.txt
-
-x.json

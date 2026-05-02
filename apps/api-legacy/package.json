@@ -1,0 +1,8 @@
+{
+  "name": "api",
+  "private": true,
+  "scripts": {
+    "dev": ".venv/bin/fastapi dev main.py",
+    "start": ".venv/bin/fastapi run main.py --workers ${WORKERS:-1}"
+  }
+}
