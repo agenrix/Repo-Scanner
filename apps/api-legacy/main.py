@@ -32,20 +32,22 @@ async def lifespan(app: FastAPI):
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        print("✅ PostgreSQL tables synchronized.")
+        print("PostgreSQL tables synchronized.")
     except Exception as e:
-        print(f"❌ Failed to sync PostgreSQL tables: {e}")
+        print(f"Failed to sync PostgreSQL tables: {e}")
 
     is_connected = await check_db_connection()
     if is_connected:
-        print("✅ Successfully connected to MongoDB Atlas (Async)")
+        print("Successfully connected to MongoDB Atlas (Async)")
     else:
-        print("❌ Failed to connect to MongoDB")
+        print("Failed to connect to MongoDB")
 
     yield
 
 
 app = FastAPI(lifespan=lifespan)
+
+
 
 app.add_middleware(
     CORSMiddleware,

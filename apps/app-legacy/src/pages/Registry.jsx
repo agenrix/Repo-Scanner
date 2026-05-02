@@ -146,7 +146,7 @@ export default function Registry() {
         setData(response.data);
       } catch (error) {
         console.error("Failed to fetch registry data", error);
-        toast.error("Failed to fetch registry data");
+        // toast.error("Failed to fetch registry data");
       } finally {
         setLoading(false);
       }

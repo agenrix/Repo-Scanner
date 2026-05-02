@@ -2,41 +2,17 @@
 
 Background worker for repository analysis jobs
 
-## Setup
+## Step-by-Step Setup and Execution
 
-Install dependencies:
+### Step 1: Configure Environment Variables
 
-```bash
-bun install
-```
-
-Run the app:
+Create a `.env` file from the example:
 
 ```bash
-bun run dev
+cp .env.example .env
 ```
 
-Start the Inngest dev server first when developing locally:
-
-```bash
-npx inngest-cli@latest dev
-```
-
-Default server address:
-
-```text
-http://localhost:3000/v1
-```
-
-Inngest dashboard address:
-
-```text
-http://localhost:8288
-```
-
-## Environment
-
-Required:
+Required variables:
 
 - `GOOGLE_GENERATIVE_AI_API_KEY`
 - `E2B_API_KEY`
@@ -46,9 +22,33 @@ Optional:
 - `PORT`
 - `LOG_LEVEL`
 - `INNGEST_API_BASE_URL`
-- `INNGEST_SIGNING_KEY`
+- `INNGEST_SIGNING_KEY` (Required for `GET /worker/events/:eventId` to prevent `503` errors)
 
-`GET /worker/events/:eventId` requires `INNGEST_SIGNING_KEY`. Without it, the route returns `503`.
+### Step 2: Install Dependencies
+
+```bash
+bun install
+```
+
+### Step 3: Start the Inngest Dev Server
+
+The worker relies on Inngest for background jobs. You must run the Inngest local server first in a separate terminal:
+
+```bash
+npx inngest-cli@latest dev
+```
+
+- Inngest dashboard address: `http://localhost:8288`
+
+### Step 4: Run the Worker App
+
+In your primary terminal, start the development server:
+
+```bash
+bun run dev
+```
+
+- Default worker API address: `http://localhost:3000/v1`
 
 ## API
 
@@ -141,9 +141,11 @@ Config error response:
 }
 ```
 
-## Example flow
+## Step 5: Test the Worker
 
-Dispatch a job:
+**1. Dispatch a job:**
+
+Send a POST request to trigger a repository analysis job:
 
 ```bash
 curl -X POST http://localhost:3000/v1/worker \
@@ -151,8 +153,12 @@ curl -X POST http://localhost:3000/v1/worker \
   -d '{"repository":"https://github.com/advtszn/altar"}'
 ```
 
-Poll the event:
+This will return a JSON response containing an `eventId`.
+
+**2. Poll the event status:**
+
+Using the `eventId` from the previous step (replace `<YOUR_EVENT_ID>`), check the job's progress:
 
 ```bash
-curl http://localhost:3000/v1/worker/events/01KQ43JX0DEA7P9ZQBKMC6N5J8
+curl http://localhost:3000/v1/worker/events/<YOUR_EVENT_ID>
 ```

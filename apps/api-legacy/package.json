@@ -2,7 +2,7 @@
   "name": "api",
   "private": true,
   "scripts": {
-    "dev": ".venv/bin/fastapi dev main.py",
-    "start": ".venv/bin/fastapi run main.py --workers ${WORKERS:-1}"
+    "dev": ".venv/Scripts/python -X utf8 -m fastapi dev main.py",
+    "start": ".venv/Scripts/python -X utf8 -m fastapi run main.py --workers ${WORKERS:-1}"
   }
 }
