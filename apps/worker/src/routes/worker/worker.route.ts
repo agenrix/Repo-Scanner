@@ -11,10 +11,6 @@ const zAnalyzeRepositoryBody = z.object({
   repository: zGithubRepository,
 });
 
-workerRoute.get("/", async (ctx) => {
-  return ctx.text(`Hello ${ctx.req.header("User-Agent")}`);
-});
-
 workerRoute.post("/", async (ctx) => {
   try {
     const body = await ctx.req.json().catch(() => null);

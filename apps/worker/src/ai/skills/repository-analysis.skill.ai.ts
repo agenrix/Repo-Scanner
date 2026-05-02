@@ -179,6 +179,8 @@ Use exactly these section headings:
 
 - \`Classification:\` one of \`AGENT\`, \`POSSIBLE_AGENT\`, or \`NOT_AGENT\`
 - \`Confidence:\` one of \`high\`, \`medium\`, or \`low\`
+- \`Agent Name:\` concise product-style name for the detected agent, or \`None\` when \`NOT_AGENT\`
+- \`Agent Description:\` one sentence describing what the detected agent does, or \`None\` when \`NOT_AGENT\`
 - \`Agent Signals:\` bullet list
 - \`Evidence Files:\` bullet list with repository-relative paths
 - \`Frameworks Detected:\` bullet list
@@ -193,6 +195,8 @@ Do not add extra sections before or after this format.
 
 Classification: <AGENT | POSSIBLE_AGENT | NOT_AGENT>
 Confidence: <high | medium | low>
+Agent Name: <name or None>
+Agent Description: <one sentence or None>
 
 Agent Signals:
 - <signal>

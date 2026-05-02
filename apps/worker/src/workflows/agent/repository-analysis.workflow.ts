@@ -89,6 +89,23 @@ function getTextPart(line: string) {
   return null;
 }
 
+function getGithubRepositoryMetadata(repository: string) {
+  const url = new URL(repository);
+  const [owner, repoSegment] = url.pathname
+    .replace(/^\/+|\/+$/g, "")
+    .split("/");
+  const repoName = repoSegment?.replace(/\.git$/, "");
+
+  if (!owner || !repoName) {
+    throw new NonRetriableError("Invalid github repository url");
+  }
+
+  return {
+    repoId: `${owner}/${repoName}`,
+    repoName,
+  };
+}
+
 export const analyzeRepositoryEvent = eventType("agent/analyze-repository", {
   schema: staticSchema<IAnalyzeRepositoryEventParams>(),
 });
@@ -113,6 +130,7 @@ export const repositoryAnalysisWorkflow = inngestClient.createFunction(
       });
 
       const repositoryAnalysisSkill = new RepositoryAnalysisSkill();
+      const repositoryMetadata = getGithubRepositoryMetadata(repository);
       const repositoryPath = "/home/user/repo";
       const skillPath = `${repositoryPath}/.opencode/skills/repository-analysis/SKILL.md`;
       const opencodeConfigPath = `${repositoryPath}/opencode.json`;
@@ -223,23 +241,63 @@ export const repositoryAnalysisWorkflow = inngestClient.createFunction(
         return { killed };
       });
 
-      const result = await step.run(
+      const postAnalysis = await step.run(
         "perform post-analysis normalization",
         async () => {
           const zAgentAnalysisSchema = z.object({
-            classification: z.enum(["AGENT", "POSSIBLE_AGENT", "NOT_AGENT"]),
-            confidence: z.enum(["high", "medium", "low"]),
-            agentSignals: z.array(z.string()),
-            evidenceFiles: z.array(z.string()),
-            frameworksDetected: z.array(z.string()),
-            reasoning: z.string(),
+            classification: z
+              .enum(["AGENT", "POSSIBLE_AGENT", "NOT_AGENT"])
+              .describe("Repository classification from the audit report."),
+            confidence: z
+              .enum(["high", "medium", "low"])
+              .describe("Confidence level from the audit report."),
+            agentName: z
+              .string()
+              .nullable()
+              .describe(
+                "Concise detected agent name. Use null when the report says None or the repository is NOT_AGENT.",
+              ),
+            agentDescription: z
+              .string()
+              .nullable()
+              .describe(
+                "One-sentence description of what the detected agent does. Use null when the report says None or the repository is NOT_AGENT.",
+              ),
+            signals: z
+              .array(z.string())
+              .nullable()
+              .describe("Agent signals listed in the audit report."),
+            evidenceFiles: z
+              .array(z.string())
+              .nullable()
+              .describe("Repository-relative evidence file paths."),
+            frameworks: z
+              .array(z.string())
+              .nullable()
+              .describe("Frameworks detected in the audit report."),
+            integrations: z
+              .object({
+                apis: z
+                  .array(z.string())
+                  .nullable()
+                  .describe("External APIs mentioned by the report."),
+                tools: z
+                  .array(z.string())
+                  .nullable()
+                  .describe("Agent tools mentioned by the report."),
+              })
+              .nullable()
+              .describe("APIs and tools mentioned by the audit report."),
+            reasoning: z
+              .string()
+              .describe("Short reasoning paragraph from the audit report."),
           });
 
           const { output } = await generateText({
             model: google("gemini-2.5-flash"),
             output: Output.object({ schema: zAgentAnalysisSchema }),
             system:
-              "Convert the provided repository analysis report into structured data. Preserve the original meaning, do not add new claims, and use empty arrays when a list section is missing.",
+              "Convert the provided repository analysis report into structured data. Preserve the original meaning, do not add new claims, use empty arrays when a list section is missing, and use null when agent name or description is None.",
             prompt: [
               "Parse this repository analysis report into the requested schema:",
               agentAnalysis || "",
@@ -250,46 +308,64 @@ export const repositoryAnalysisWorkflow = inngestClient.createFunction(
         },
       );
 
-      // todo: send the output to the backend webhook url
-
-      await step.run("send-to-backend", async () => {
+      const result = await step.run("send-to-backend", async () => {
         const backendPayload = {
-          agent_id: "repository-analyzer-bot", // Mandatory
-
-          event: {
-            action: "repository_analysis",
-            // Include evidence files here for quick SQL-side filtering if needed
-            files_altered: result?.evidenceFiles || [],
+          repo: {
+            repo_id: repositoryMetadata.repoId,
+            repo_name: repositoryMetadata.repoName,
+            repo_link: repository,
+            classification: postAnalysis.classification,
+            confidence: postAnalysis.confidence,
+            agent_signals: postAnalysis.signals ?? [],
+            evidence_files: postAnalysis.evidenceFiles ?? [],
+            frameworks_detected: postAnalysis.frameworks ?? [],
+            reasoning: postAnalysis.reasoning,
           },
-
-          data_shared: [
-            {
-              item: "repository_scan_report",
-              classification: result?.classification || "NOT_AGENT",
-              // Storing the detailed audit results in metadata for NoSQL storage
-              metadata: {
-                agent_signals: result?.agentSignals || [],
-                evidence_files: result?.evidenceFiles || [],
-                reasoning: result?.reasoning || "No reasoning provided",
-                frameworks: result?.frameworksDetected || [],
-              },
-            },
-          ],
+          ...(postAnalysis.classification !== "NOT_AGENT"
+            ? {
+                agent: {
+                  agent_id: repositoryMetadata.repoId,
+                  agent_name: postAnalysis.agentName ?? repositoryMetadata.repoName,
+                  agent_description:
+                    postAnalysis.agentDescription ?? postAnalysis.reasoning,
+                  owner: repositoryMetadata.repoId.split("/")[0],
+                  contributors: [],
+                  access_rights: {
+                    files: [],
+                    tools: postAnalysis.integrations?.tools ?? [],
+                    data_nodes: [],
+                    apis: postAnalysis.integrations?.apis ?? [],
+                    servers: [],
+                  },
+                  integration_details: {
+                    apis: postAnalysis.integrations?.apis ?? [],
+                    tools: postAnalysis.integrations?.tools ?? [],
+                    frameworks: postAnalysis.frameworks ?? [],
+                  },
+                },
+              }
+            : {}),
         };
 
-        const response = await fetch(`${env.BACKEND_API_URL}/log_agent_work`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(backendPayload),
-        });
+        // const response = await fetch(
+        //   `${env.BACKEND_WEBHOOK_BASE_URL}/repo_scans`,
+        //   {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify(backendPayload),
+        //   },
+        // );
 
-        if (!response.ok) {
-          throw new Error(`Backend returned ${response.status}`);
-        }
+        // if (!response.ok) {
+        //   throw new Error(
+        //     `Backend returned ${response.status}: ${await response.text()}`,
+        //   );
+        // }
 
-        return await response.json();
+        // return await response.json();
+        return backendPayload
       });
 
       return result;
