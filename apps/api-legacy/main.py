@@ -108,7 +108,7 @@ async def list_agents(
     data_node: Optional[str] = None,
     api: Optional[str] = None,
     server: Optional[str] = None,
-    # NoSQL Agent Filters
+    
     session_id: Optional[str] = None,
     used_by: Optional[str] = None,
     action: Optional[str] = None,
@@ -120,7 +120,7 @@ async def list_agents(
     is_confidential: Optional[bool] = None,
     location_path: Optional[str] = None,
     encryption_status: Optional[str] = None,
-    # Repo Cross-Filters
+    
     repo_name: Optional[str] = None,
     repo_link: Optional[str] = None,
     repo_classification: Optional[str] = None,
@@ -136,7 +136,7 @@ async def list_agents(
 ):
     query = select(AgentModel)
 
-    # --- CROSS-DATABASE REPO FILTERING ---
+    
     repo_sql_filter_active = any(
         [repo_name, repo_link, repo_classification, repo_confidence, repo_status]
     )
@@ -152,7 +152,7 @@ async def list_agents(
     if repo_sql_filter_active or repo_nosql_filter_active:
         matching_repo_ids = set()
 
-        # 1. Query Repo SQL if SQL parameters are given
+        
         if repo_sql_filter_active:
             repo_query = select(RepoModelSQL.repo_id)
             if repo_name:
@@ -175,7 +175,7 @@ async def list_agents(
             repo_result = await db.execute(repo_query)
             sql_repo_ids = set(repo_result.scalars().all())
 
-        # 2. Query Repo NoSQL if NoSQL parameters are given
+        
         if repo_nosql_filter_active:
             nosql_repo_records = await RepoModel.search_repo_records(
                 agent_signals=repo_agent_signals,
@@ -187,7 +187,7 @@ async def list_agents(
                 [r["repo_id"] for r in nosql_repo_records if "repo_id" in r]
             )
 
-        # 3. Intersect Repo Sets
+        
         if repo_sql_filter_active and repo_nosql_filter_active:
             matching_repo_ids = sql_repo_ids.intersection(nosql_repo_ids)
         elif repo_sql_filter_active:
@@ -199,9 +199,9 @@ async def list_agents(
             return []
 
         query = query.where(AgentModel.source_repo_id.in_(list(matching_repo_ids)))
-    # ---------------------------------------
+    
 
-    # Existing Agent Filters
+    
     if search and str(search).strip():
         search_str = f"%{str(search).strip()}%"
         query = query.where(
@@ -212,7 +212,7 @@ async def list_agents(
             )
         )
 
-    # Pre-filter with NoSQL if NoSQL params are provided
+    
     nosql_filter_active = any(
         [
             session_id,
@@ -248,7 +248,7 @@ async def list_agents(
             set([r["agent_id"] for r in nosql_records if "agent_id" in r])
         )
         if not matching_agent_ids:
-            return []  # Early exit if NoSQL filters found no agents
+            return []  
         query = query.where(AgentModel.agent_id.in_(matching_agent_ids))
 
     if search and str(search).strip() and not nosql_filter_active:
@@ -343,20 +343,20 @@ async def list_agents(
 
     nosql_results = await asyncio.gather(*(fetch_nosql(agent) for agent in agents))
 
-    # --- FETCH REPO DATA TO ENRICH AGENT PAYLOAD ---
+    
     async def fetch_repo_data(agent):
         try:
             if not agent.source_repo_id:
                 return None, None
 
-            # SQL Repo
+            
             r_query = select(RepoModelSQL).where(
                 RepoModelSQL.repo_id == agent.source_repo_id
             )
             r_result = await db.execute(r_query)
             r_sql = r_result.scalar_one_or_none()
 
-            # NoSQL Repo
+            
             r_nosql = await RepoModel.search_repo_records(repo_id=agent.source_repo_id)
 
             return (
@@ -446,7 +446,7 @@ async def add_repo_scan(
     try:
         scan_data = payload.repo
 
-        # 1. Update SQL Repo Data
+        
         query = select(RepoModelSQL).where(RepoModelSQL.repo_id == scan_data.repo_id)
         result = await db.execute(query)
         repo_sql = result.scalar_one_or_none()
@@ -468,7 +468,7 @@ async def add_repo_scan(
             repo_sql.confidence = scan_data.confidence
         await db.commit()
 
-        # 2. Update NoSQL Repo Data
+        
         await RepoModel.create_scan_result(scan_data.model_dump())
 
         auto_registered = False
@@ -521,7 +521,7 @@ async def add_repo_scan(
                     await db.rollback()
                     print(f"Auto-registration failed: {db_e}")
             else:
-                # Explicitly link existing agent to this repo
+                
                 try:
                     agent.source_repo_id = scan_data.repo_id
                     db.add(agent)
@@ -568,7 +568,7 @@ async def list_repo_scans(
     try:
         query = select(RepoModelSQL)
 
-        # Pre-filter with NoSQL if any NoSQL params present
+        
         nosql_filter_active = any(
             [agent_signals, evidence_files, frameworks_detected, reasoning]
         )

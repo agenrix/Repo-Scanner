@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env
+.env.*
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+dist/
+build/
+.turbo/

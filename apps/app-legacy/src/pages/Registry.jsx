@@ -21,9 +21,9 @@ export default function Registry() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Global Search
+  
 
-  // Advanced Parameters
+  
   const [activeParams, setActiveParams] = useState({});
   const [paramMenuOpen, setParamMenuOpen] = useState(false);
   const paramRef = useRef(null);
@@ -116,7 +116,7 @@ export default function Registry() {
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
   const columnRef = useRef(null);
 
-  // Click outside handlers
+  
   useEffect(() => {
     function handleClickOutside(event) {
       if (paramRef.current && !paramRef.current.contains(event.target))
@@ -146,7 +146,7 @@ export default function Registry() {
         setData(response.data);
       } catch (error) {
         console.error("Failed to fetch registry data", error);
-        // toast.error("Failed to fetch registry data");
+        
       } finally {
         setLoading(false);
       }
@@ -286,7 +286,7 @@ export default function Registry() {
       return;
     }
 
-    // Determine which columns to export based on visibility
+    
     const exportColumns = Object.entries(COLUMNS_CATEGORIES)
       .flatMap(([_, cols]) => cols)
       .filter((col) => visibleColumns[col.key]);
@@ -331,7 +331,7 @@ export default function Registry() {
       </div>
 
       <div className="bg-card border border-border rounded-lg p-6 shadow-sm mb-6 flex flex-col gap-4">
-        {/* Top row: Column Menu + Search / Clear Actions */}
+        {}
         <div className="flex flex-wrap gap-4 items-end justify-between">
           <div className="flex flex-wrap gap-3 items-center">
             <div className="relative" ref={paramRef}>
@@ -452,7 +452,7 @@ export default function Registry() {
             </button>
           </div>
 
-          {/* Right side */}
+          {}
           <div className="flex flex-wrap gap-3 items-center">
             <button
               onClick={clearAll}
@@ -469,7 +469,7 @@ export default function Registry() {
           </div>
         </div>
 
-        {/* Dynamic Parameter Inputs */}
+        {}
         {Object.keys(activeParams).length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-2 pt-4 border-t border-border">
             {Object.keys(activeParams).map((key) => {

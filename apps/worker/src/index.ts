@@ -14,7 +14,7 @@ import { repositoryAnalysisWorkflow } from "./workflows/agent/repository-analysi
 
 const app = new Hono();
 
-// configure cors origins later
+
 app.use("*", cors());
 app.use("*", setupMiddleware);
 app.use(

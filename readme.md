@@ -40,5 +40,42 @@ The project is split into two specialized modules. Refer to the individual READM
 
 ---
 
+## 🐳 Docker Deployment
+
+You can run the entire Agenrix stack (Frontend, Backend, and Worker) with a single command using Docker Compose.
+
+### Prerequisites
+Ensure Docker and Docker Compose are installed on your machine.
+
+### Instructions
+
+1. **Configure Environment Variables:**
+   Ensure you have created the `.env` files for each workspace from their respective examples:
+   - `apps/api-legacy/.env`
+   - `apps/app-legacy/.env`
+   - `apps/worker/.env`
+
+2. **Start the Stack:**
+   Run the following command at the root of the project to build the images and start the containers in detached mode:
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. **Access the Services:**
+   - **Frontend (Registry Dashboard):** `http://localhost:80`
+   - **Backend API:** internally available at `http://api:8000` (proxied by Nginx)
+
+4. **View Logs:**
+   ```bash
+   docker compose logs -f
+   ```
+
+5. **Stop the Stack:**
+   ```bash
+   docker compose down
+   ```
+
+---
+
 ## 📝 Note
 Ensure both your **PostgreSQL** and **MongoDB** instances are reachable and authorized before starting the backend service. See the [Backend README](./Backend/README.md) for precise connection string requirements and IP allowlisting tips.

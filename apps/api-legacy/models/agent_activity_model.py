@@ -12,7 +12,7 @@ class NoSQLModel:
 
     @staticmethod
     async def add_telemetry_record(telemetry_data: dict):
-        # Calculate risk/compliance based on data_shared
+        
         is_risky = any(
             item.get("is_confidential") and item.get("encryption_status") == "None" 
             for item in telemetry_data.get("data_shared", [])
@@ -50,7 +50,7 @@ class NoSQLModel:
         if files_altered: query["event.files_altered"] = {"$regex": files_altered, "$options": "i"}
         if recipient: query["recipient"] = {"$regex": recipient, "$options": "i"}
         
-        # Build array match for data_shared
+        
         data_filter = {}
         if item: data_filter["item"] = {"$regex": item, "$options": "i"}
         if classification: data_filter["classification"] = {"$regex": classification, "$options": "i"}
@@ -62,7 +62,7 @@ class NoSQLModel:
             query["data_shared"] = {"$elemMatch": data_filter}
         
         if search:
-            # Fuzzy match across generic payload areas
+            
             search_regex = {"$regex": search, "$options": "i"}
             or_conditions = [
                 {"event.action": search_regex},
@@ -81,7 +81,7 @@ class NoSQLModel:
             
         records = await telemetry_collection.find(query).to_list(None)
         
-        # Clean ObjectIds
+        
         for r in records:
             if "_id" in r:
                 r["_id"] = str(r["_id"])
