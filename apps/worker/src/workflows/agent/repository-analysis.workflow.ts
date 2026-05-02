@@ -241,7 +241,7 @@ export const repositoryAnalysisWorkflow = inngestClient.createFunction(
         return { killed };
       });
 
-      const postAnalysis = await step.run(
+      const postAnalysisResult = await step.run(
         "perform post-analysis normalization",
         async () => {
           const zAgentAnalysisSchema = z.object({
@@ -308,67 +308,71 @@ export const repositoryAnalysisWorkflow = inngestClient.createFunction(
         },
       );
 
-      const result = await step.run("send-to-backend", async () => {
+      const webhookResult = await step.run("send-to-webhook", async () => {
         const backendPayload = {
           repo: {
             repo_id: repositoryMetadata.repoId,
             repo_name: repositoryMetadata.repoName,
             repo_link: repository,
-            classification: postAnalysis.classification,
-            confidence: postAnalysis.confidence,
-            agent_signals: postAnalysis.signals ?? [],
-            evidence_files: postAnalysis.evidenceFiles ?? [],
-            frameworks_detected: postAnalysis.frameworks ?? [],
-            reasoning: postAnalysis.reasoning,
+            classification: postAnalysisResult.classification,
+            confidence: postAnalysisResult.confidence,
+            agent_signals: postAnalysisResult.signals ?? [],
+            evidence_files: postAnalysisResult.evidenceFiles ?? [],
+            frameworks_detected: postAnalysisResult.frameworks ?? [],
+            reasoning: postAnalysisResult.reasoning,
           },
-          ...(postAnalysis.classification !== "NOT_AGENT"
+          ...(postAnalysisResult.classification !== "NOT_AGENT"
             ? {
                 agent: {
                   agent_id: repositoryMetadata.repoId,
-                  agent_name: postAnalysis.agentName ?? repositoryMetadata.repoName,
+                  agent_name:
+                    postAnalysisResult.agentName ?? repositoryMetadata.repoName,
                   agent_description:
-                    postAnalysis.agentDescription ?? postAnalysis.reasoning,
+                    postAnalysisResult.agentDescription ??
+                    postAnalysisResult.reasoning,
                   owner: repositoryMetadata.repoId.split("/")[0],
                   contributors: [],
                   access_rights: {
                     files: [],
-                    tools: postAnalysis.integrations?.tools ?? [],
+                    tools: postAnalysisResult.integrations?.tools ?? [],
                     data_nodes: [],
-                    apis: postAnalysis.integrations?.apis ?? [],
+                    apis: postAnalysisResult.integrations?.apis ?? [],
                     servers: [],
                   },
                   integration_details: {
-                    apis: postAnalysis.integrations?.apis ?? [],
-                    tools: postAnalysis.integrations?.tools ?? [],
-                    frameworks: postAnalysis.frameworks ?? [],
+                    apis: postAnalysisResult.integrations?.apis ?? [],
+                    tools: postAnalysisResult.integrations?.tools ?? [],
+                    frameworks: postAnalysisResult.frameworks ?? [],
                   },
                 },
               }
             : {}),
         };
 
-        // const response = await fetch(
-        //   `${env.BACKEND_WEBHOOK_BASE_URL}/repo_scans`,
-        //   {
-        //     method: "POST",
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify(backendPayload),
-        //   },
-        // );
+        const response = await fetch(
+          `${env.BACKEND_WEBHOOK_BASE_URL}/repo_scans`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(backendPayload),
+          },
+        );
 
-        // if (!response.ok) {
-        //   throw new Error(
-        //     `Backend returned ${response.status}: ${await response.text()}`,
-        //   );
-        // }
+        if (!response.ok) {
+          throw new Error(
+            `Backend returned ${response.status}: ${await response.text()}`,
+          );
+        }
 
-        // return await response.json();
-        return backendPayload
+        return { input: await response.json(), output: backendPayload };
       });
 
-      return result;
+      return {
+        postAnalysis: postAnalysisResult,
+        webhook: webhookResult,
+      };
     } catch (error) {
       generalLogger.error(
         {
