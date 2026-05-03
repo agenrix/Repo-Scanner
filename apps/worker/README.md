@@ -30,9 +30,9 @@ Optional:
 bun install
 ```
 
-### Step 3: Start the Inngest Dev Server
+### Step 3: Start the Inngest Dev Server (Skip if using Docker Compose)
 
-The worker relies on Inngest for background jobs. You must run the Inngest local server first in a separate terminal:
+The worker relies on Inngest for background jobs. If you are not running the stack via Docker Compose (which spins up the Inngest Dev Server automatically), you must run the Inngest local server first in a separate terminal:
 
 ```bash
 npx inngest-cli@latest dev
@@ -41,6 +41,7 @@ npx inngest-cli@latest dev
 - Inngest dashboard address: `http://localhost:8288`
 
 ### Step 4: Run the Worker App
+
 
 In your primary terminal, start the development server:
 

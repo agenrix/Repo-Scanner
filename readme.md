@@ -78,4 +78,4 @@ Ensure Docker and Docker Compose are installed on your machine.
 ---
 
 ## 📝 Note
-Ensure both your **PostgreSQL** and **MongoDB** instances are reachable and authorized before starting the backend service. See the [Backend README](./Backend/README.md) for precise connection string requirements and IP allowlisting tips.
+Ensure both your **PostgreSQL** and **MongoDB** instances are reachable and authorized before starting the backend service. **Ensure you use an IPv4-compatible PostgreSQL connection string configured for transaction pooling, appending `?prepared_statement_cache_size=0` at the end of the URL.** See the [Backend README](./apps/api-legacy/README.md) for precise connection string requirements and IP allowlisting tips.

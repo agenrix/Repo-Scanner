@@ -120,7 +120,8 @@ The system provides a single-window search experience by executing parallel quer
 *   **Environment Variables:**
     ```env
     PORT=8000
-    POSTGRES_URI=postgresql+asyncpg://user:pass@localhost:5432/agenrix
+    # NOTE: Ensure you use an IPv4-compatible PostgreSQL connection string with transaction pooling, appending ?prepared_statement_cache_size=0 at the end.
+    POSTGRES_URI=postgresql+asyncpg://user.pooler_id:pass@host.pooler.supabase.com:6543/postgres?prepared_statement_cache_size=0
     MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/agentdb
     ```
 
