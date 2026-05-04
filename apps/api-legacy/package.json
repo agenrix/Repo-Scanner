@@ -1,0 +1,8 @@
+{
+  "name": "api",
+  "private": true,
+  "scripts": {
+    "dev": ".venv/Scripts/python -X utf8 -m fastapi dev main.py",
+    "start": ".venv/Scripts/python -X utf8 -m fastapi run main.py --workers ${WORKERS:-1}"
+  }
+}

@@ -1,44 +1,116 @@
 # Agenrix: Unified Agent Registry & Audit System
 
-**Agenrix** is a premium full-stack enterprise solution designed to manage, monitor, and audit autonomous agents across repositories. It provides a centralized **Unified Registry** to track agent identities, control access rights, and log high-frequency telemetry for security compliance.
-
----
-
-## 🚀 Core Functionalities
-
-*   **Unified Registry Dashboard:** A consolidated interface for exploring repository metadata (SQL) and deep audit intelligence (NoSQL) simultaneously.
-*   **Split-Write Intelligence:** Automated workflow that synchronizes structural identity in PostgreSQL and high-volume audit logs in MongoDB.
-*   **Auto-Registration Engine:** Automatically registers and upserts agent profiles into the registry during repository scans if agentic behavior is detected.
-*   **Bulk CSV Operations:** Integrated PapaParse engine for high-speed client-side ingestion of telemetry and agent metadata.
-*   **Advanced Fuzzy Search:** Simultaneous parallel queries via ILIKE (SQL) and $regex (NoSQL) joined by unique repository identifiers.
+**Agenrix** is an enterprise-grade solution for managing, monitoring, and auditing autonomous agents across software repositories. It combines a centralized **Unified Registry** with split-database architecture to track agent identities, control access rights, and maintain comprehensive audit logs for security and compliance.
 
 ---
 
 ## 🏗️ Technical Architecture
 
-Agenrix employs a **Split-Write Strategy** to balance relational integrity with big-data scalability:
+Agenrix employs a **Split-Write Strategy** to optimize for both relational integrity and high-volume telemetry:
 
-1.  **Registry Layer (PostgreSQL):** Stores "Structural Identity"—metadata about repositories and agents that requires strict schema enforcement.
-2.  **Audit Layer (MongoDB):** Stores "High-Volume Telemetry"—AI reasoning signals, framework detection, and event streams using the **Bucket Pattern**.
-
----
-
-## 📂 Project Structure
-
-The project is split into two specialized modules. Refer to the individual README files for detailed setup and API documentation.
-
-### 🛠️ [Backend Implementation](./Backend/README.md)
-*   **Tech Stack:** FastAPI (Async), SQLAlchemy (AsyncPG), MongoDB (Motor).
-*   **Key Logic:** Auto-Registration upserts, dual-database joins, and Pydantic validation.
-*   **Setup:** Requires Python 3.10+, virtual environment, and `.env` configuration.
-
-### 💻 [Frontend Implementation](./Frontend/README.md)
-*   **Tech Stack:** React 19, Vite, Tailwind CSS 4.0.
-*   **Aesthetics:** High-contrast "Deep Charcoal" and "Action Yellow" design system with "Shades of White" professional light mode.
-*   **Key Features:** Top-fixed persistent branding, dynamic registry table, and client-side CSV parsing.
-*   **Setup:** Requires Node.js 16+, `npm install`, and `.env` configuration.
+- **Registry Layer (PostgreSQL):** Stores structural metadata (repositories, agents, classifications, access rights) with ACID guarantees.
+- **Audit Layer (MongoDB):** Stores high-frequency telemetry (AI reasoning signals, framework detection, activity events) with flexible schema.
 
 ---
 
-## 📝 Note
-Ensure both your **PostgreSQL** and **MongoDB** instances are reachable and authorized before starting the backend service. See the [Backend README](./Backend/README.md) for precise connection string requirements and IP allowlisting tips.
+## 📂 Project Components
+
+Each component has its own comprehensive README with setup instructions, API documentation, and configuration details. Start with the component that matches your role:
+
+| Component              | Tech Stack                       | Purpose                                                                                           | Doc Link                                       |
+| ---------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **Backend API**        | FastAPI, AsyncPG, MongoDB, Motor | Core registry and audit service; handles ingestion, validation, and dual-database writes          | [Backend README](./apps/api-legacy/README.md)  |
+| **Frontend Dashboard** | React 19, Vite, Tailwind CSS 4.0 | Web UI for registry exploration, advanced search, and audit intelligence visualization            | [Frontend README](./apps/app-legacy/README.md) |
+| **Worker Service**     | Bun, TypeScript, Hono, Inngest   | Background job processor for repository analysis, AI provider integration, and telemetry emission | [Worker README](./apps/worker/README.md)       |
+
+---
+
+## 🚀 Quick Start
+
+## � Quick Start
+
+### Option 1: Docker Compose (Recommended for Full Stack)
+
+Run the entire stack (Frontend, Backend, Worker, Inngest, PostgreSQL, MongoDB) with a single command:
+
+```bash
+# 1. Configure environment variables for each service
+cp apps/api-legacy/.env.example apps/api-legacy/.env
+cp apps/app-legacy/.env.example apps/app-legacy/.env
+cp apps/worker/.env.example apps/worker/.env
+
+# 2. Start the full stack
+docker compose up -d --build
+
+# 3. Access services
+# Frontend: http://localhost:80
+# Backend API: http://localhost:8000 (or via Nginx proxy)
+# Inngest Dashboard: http://localhost:8288
+```
+
+For detailed setup and service access information, see [Docker Deployment](#docker-deployment) below.
+
+### Option 2: Local Development
+
+Each component can be run independently. Refer to the component's README for detailed setup:
+
+- [Backend Setup](./apps/api-legacy/README.md#setup-and-running)
+- [Frontend Setup](./apps/app-legacy/README.md#development-setup)
+- [Worker Setup](./apps/worker/README.md#step-by-step-setup-and-execution)
+
+---
+
+## 🐳 Docker Deployment
+
+All services can be deployed together using Docker Compose. Ensure Docker and Docker Compose are installed.
+
+**Services included:**
+
+- PostgreSQL (Registry database)
+- MongoDB (Audit database)
+- Inngest Dev Server (Job orchestration dashboard)
+- Backend API (FastAPI on port 8000)
+- Frontend (React dashboard on port 80, via Nginx)
+- Worker (Bun service on port 3000)
+
+**Instructions:**
+
+1. **Configure Environment Variables:**
+   Create `.env` files for each service from their examples:
+
+    ```bash
+    cp apps/api-legacy/.env.example apps/api-legacy/.env
+    cp apps/app-legacy/.env.example apps/app-legacy/.env
+    cp apps/worker/.env.example apps/worker/.env
+    ```
+
+2. **Start the Stack:**
+
+    ```bash
+    docker compose up -d --build
+    ```
+
+3. **Access Services:**
+    - **Frontend (Registry Dashboard):** `http://localhost:80`
+    - **Backend API Docs:** `http://localhost:8000/docs`
+    - **Inngest Dashboard:** `http://localhost:8288`
+
+4. **View Logs:**
+
+    ```bash
+    docker compose logs -f [service-name]
+    # Examples: docker compose logs -f backend, docker compose logs -f worker
+    ```
+
+5. **Stop the Stack:**
+    ```bash
+    docker compose down
+    ```
+
+---
+
+## ⚠️ Important Notes
+
+- **PostgreSQL Connection:** Ensure IPv4-compatible connection strings with transaction pooling (`?prepared_statement_cache_size=0`). See [Backend README](./apps/api-legacy/README.md) for details.
+- **Database Connectivity:** PostgreSQL and MongoDB must be reachable and authorized before starting the backend service.
+- **API Keys:** The Worker service requires `GOOGLE_GENERATIVE_AI_API_KEY` and `E2B_API_KEY` (see [Worker README](./apps/worker/README.md) for details).

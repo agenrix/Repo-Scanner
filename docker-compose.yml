@@ -1,0 +1,53 @@
+services:
+  api:
+    build:
+      context: ./apps/api-legacy
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./apps/api-legacy/.env
+    restart: unless-stopped
+    networks:
+      - agenrix-network
+
+  worker:
+    build:
+      context: ./apps/worker
+      dockerfile: Dockerfile
+    environment:
+      - INNGEST_API_BASE_URL=http://inngest:8288
+    env_file:
+      - ./apps/worker/.env
+    restart: unless-stopped
+    networks:
+      - agenrix-network
+    depends_on:
+      - api
+      - inngest
+
+  inngest:
+    image: node:20-alpine
+    command: npx inngest-cli@latest dev -u http://worker:3000/api/inngest --host 0.0.0.0
+    ports:
+      - "8288:8288"
+    networks:
+      - agenrix-network
+
+  frontend:
+    build:
+      context: ./apps/app-legacy
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    env_file:
+      - ./apps/app-legacy/.env
+    restart: unless-stopped
+    networks:
+      - agenrix-network
+    depends_on:
+      - api
+
+networks:
+  agenrix-network:
+    driver: bridge
