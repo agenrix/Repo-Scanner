@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "@agenrix/api-legacy",
   "private": true,
   "scripts": {
     "dev": ".venv/bin/fastapi dev main.py",

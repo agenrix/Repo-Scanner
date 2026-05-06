@@ -1,5 +1,5 @@
 {
-  "name": "api-v2",
+  "name": "@agenrix/api",
   "module": "index.ts",
   "type": "module",
   "private": true,
