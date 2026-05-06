@@ -6,7 +6,7 @@ repo_collection = db["repo_intelligence"]
 class RepoModel:
     @staticmethod
     async def create_scan_result(data: dict):
-        # We only store NoSQL data here.
+        
         nosql_data = {
             "repo_id": data.get("repo_id"),
             "agent_signals": data.get("agent_signals", []),

@@ -44,13 +44,46 @@ async function inngestFetch<T>(path: string) {
 }
 
 export const inngestSdk = {
-  getEvent(eventId: string) {
+  async getEvent(eventId: string) {
+    if (env.INNGEST_DEV === 1) {
+      const response = await inngestFetch<any>(`/v1/events/${eventId}`);
+      return {
+        data: {
+          id: response.data.internal_id,
+          name: response.data.name,
+          data: response.data.data,
+          createdAt: response.data.received_at,
+        } as InngestEvent,
+      };
+    }
     return inngestFetch<InngestEvent>(`/v2/events/${eventId}`);
   },
-  getEventRuns(eventId: string) {
+  async getEventRuns(eventId: string) {
+    if (env.INNGEST_DEV === 1) {
+      const response = await inngestFetch<any[]>(`/v1/events/${eventId}/runs`);
+      return {
+        data: response.data.map((r: any) => ({
+          runId: r.run_id,
+          functionId: r.function_id,
+          status: typeof r.status === "string" ? r.status.toLowerCase() : r.status,
+          startedAt: r.run_started_at,
+        } as InngestRun)),
+      };
+    }
     return inngestFetch<InngestRun[]>(`/v2/events/${eventId}/runs`);
   },
-  getRun(runId: string) {
+  async getRun(runId: string) {
+    if (env.INNGEST_DEV === 1) {
+      const response = await inngestFetch<any>(`/v1/runs/${runId}`);
+      return {
+        data: {
+          runId: response.data.run_id,
+          functionId: response.data.function_id,
+          status: typeof response.data.status === "string" ? response.data.status.toLowerCase() : response.data.status,
+          startedAt: response.data.run_started_at,
+        } as InngestRun,
+      };
+    }
     return inngestFetch<InngestRun>(`/v2/runs/${runId}`);
   },
 };
