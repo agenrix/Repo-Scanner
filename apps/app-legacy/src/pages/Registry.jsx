@@ -21,9 +21,6 @@ export default function Registry() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  
-
-  
   const [activeParams, setActiveParams] = useState({});
   const [paramMenuOpen, setParamMenuOpen] = useState(false);
   const paramRef = useRef(null);
@@ -116,7 +113,6 @@ export default function Registry() {
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
   const columnRef = useRef(null);
 
-  
   useEffect(() => {
     function handleClickOutside(event) {
       if (paramRef.current && !paramRef.current.contains(event.target))
@@ -146,7 +142,6 @@ export default function Registry() {
         setData(response.data);
       } catch (error) {
         console.error("Failed to fetch registry data", error);
-        
       } finally {
         setLoading(false);
       }
@@ -286,7 +281,6 @@ export default function Registry() {
       return;
     }
 
-    
     const exportColumns = Object.entries(COLUMNS_CATEGORIES)
       .flatMap(([_, cols]) => cols)
       .filter((col) => visibleColumns[col.key]);

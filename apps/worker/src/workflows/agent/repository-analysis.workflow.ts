@@ -189,7 +189,6 @@ export const repositoryAnalysisWorkflow = inngestClient.createFunction(
             {
               cwd: repositoryPath,
               onStdout: (data) => {
-                
                 captureJsonLines(stdoutCapture, String(data), (line) => {
                   const text = getTextPart(line);
 
@@ -198,9 +197,7 @@ export const repositoryAnalysisWorkflow = inngestClient.createFunction(
                   }
                 });
               },
-              onStderr: (data) => {
-                
-              },
+              onStderr: (_) => {},
               timeoutMs: 600_000,
             },
           );
