@@ -1,14 +1,16 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { userSchema } from "./user";
+import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { userSchema } from "./user.schema";
 
 export const accountSchema = pgTable(
   "account",
   {
-    id: text("id").primaryKey(),
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => userSchema.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),

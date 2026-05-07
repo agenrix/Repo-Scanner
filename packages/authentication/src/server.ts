@@ -45,4 +45,9 @@ export const createAuthenticationServerClient = ({
     plugins: [...plugins, dash(), tanstackStartCookies()],
     trustedOrigins,
     secret,
+    advanced: {
+      database: {
+        generateId: false,
+      },
+    },
   });

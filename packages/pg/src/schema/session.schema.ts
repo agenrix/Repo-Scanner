@@ -1,11 +1,13 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-import { userSchema } from "./user";
+import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { userSchema } from "./user.schema";
 
 export const sessionSchema = pgTable(
   "session",
   {
-    id: text("id").primaryKey(),
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -14,7 +16,7 @@ export const sessionSchema = pgTable(
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
-    userId: text("user_id")
+    userId: uuid("user_id")
       .notNull()
       .references(() => userSchema.id, { onDelete: "cascade" }),
   },
