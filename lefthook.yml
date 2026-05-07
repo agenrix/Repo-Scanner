@@ -2,5 +2,5 @@ pre-commit:
   commands:
     check:
       glob: "*"
-      run: npx @biomejs/biome check --write --files-ignore-unknown=true {all_files}
+      run: bunx @biomejs/biome check --write --files-ignore-unknown=true {all_files}
       stage_fixed: true

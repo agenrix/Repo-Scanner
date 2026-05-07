@@ -1,6 +1,8 @@
+import type { PinoLogger } from "@agenrix/logger";
 import { Hono } from "hono";
 import { injectable } from "inversify";
 import z from "zod";
+import type { ILogger } from "~/infrastructure/logger/logger.infrastructure";
 import { HttpError, HttpMethod } from "~/shared/types/http.types";
 import {
   type AnyResponseSchema,
@@ -46,6 +48,7 @@ export interface RequestContext<
   data: z.output<TRequestSchema>;
   response: IResponseUtils<TResponseSchema>;
   authentication: RouteAuthentication<TAuthenticated>;
+  logger: PinoLogger;
 }
 
 type RouteHandler<
@@ -74,7 +77,7 @@ export abstract class HttpRoute implements IHttpRoute {
   private readonly router: IHttpApp;
   private initialized = false;
 
-  constructor() {
+  constructor(private readonly logger: ILogger) {
     this.router = new Hono();
   }
 
@@ -169,8 +172,10 @@ export abstract class HttpRoute implements IHttpRoute {
           authentication: (authenticated
             ? ctx.var.authentication
             : null) as RouteAuthentication<TAuthenticated>,
+          logger: this.logger.general.child({ reqId: ctx.var.requestId }),
         });
-      } catch {
+      } catch (error) {
+        this.logger.general.error({ error, requestId: ctx.var.requestId });
         return response.somethingWentWrong();
       }
     };
