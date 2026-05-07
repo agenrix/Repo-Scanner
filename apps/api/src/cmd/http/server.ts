@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { pinoLogger } from "hono-pino";
 import { inject, injectable } from "inversify";
+import { authentication } from "~/infrastructure/config/better-auth.config";
 import { env } from "~/infrastructure/config/env.config";
 import {
   HTTP_SYMBOL,
@@ -18,8 +19,12 @@ export interface IHttpServer {
 @injectable()
 export class HttpServer implements IHttpServer {
   constructor(
-    @inject(INFRASTRUCTURE_SYMBOL.Logger) private readonly logger: ILogger,
-    @inject(HTTP_SYMBOL.Router.Bootstrap) private readonly router: IHttpRouter,
+    @inject(INFRASTRUCTURE_SYMBOL.Logger)
+    private readonly logger: ILogger,
+
+    @inject(HTTP_SYMBOL.Router.Bootstrap)
+    private readonly router: IHttpRouter,
+
     @inject(HTTP_SYMBOL.Middleware.RequestId)
     private readonly requestIdMiddleware: IHttpMiddleware,
   ) {}
@@ -31,6 +36,13 @@ export class HttpServer implements IHttpServer {
     const app: IHttpApp = new Hono();
 
     await this.setupMiddlewares(app);
+
+    app.on(
+      ["GET", "POST"],
+      "/v1/authentication/*",
+      async (c) => await authentication.handler(c.req.raw),
+    );
+
     await this.router.init("/v1", app);
     await this.start(app);
   }

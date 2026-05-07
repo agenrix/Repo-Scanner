@@ -5,15 +5,19 @@
   "private": true,
   "scripts": {
     "dev": "bun run --hot src/cmd/http/index.ts",
+    "build": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "start": "bun --bun dist/cmd/http/index.js",
     "typecheck": "bunx tsc --noEmit"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "tsc-alias": "^1.8.17"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "@agenrix/authentication": "workspace:*",
     "@agenrix/logger": "workspace:*",
     "hono": "^4.12.18",
     "hono-pino": "^0.10.3",

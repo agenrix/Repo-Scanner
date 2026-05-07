@@ -104,7 +104,7 @@ export abstract class HttpRoute implements IHttpRoute {
     authenticated,
     handler,
   }: RegisterRouteParams<TRequestSchema, TResponseSchema, TAuthenticated>) {
-    const routeHandler = this.processRequest(
+    const routeHandler = this.handleRequest(
       requestSchema,
       responseSchema,
       authenticated,
@@ -130,7 +130,7 @@ export abstract class HttpRoute implements IHttpRoute {
     }
   }
 
-  private processRequest<
+  private handleRequest<
     TRequestSchema extends AnyRequestSchema,
     TResponseSchema extends AnyResponseSchema,
     TAuthenticated extends boolean,
