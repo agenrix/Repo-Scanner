@@ -18,6 +18,7 @@ export const env: IEnvSchema = validate(zEnvSchema, {
   http: {
     port: process.env.PORT !== undefined ? Number(process.env.PORT) : undefined,
     baseUrl: process.env.BASE_URL as string,
+    corsOrigins: process.env.CORS_ORIGINS as string,
   },
   authentication: {
     secret: process.env.AUTH_SECRET as string,

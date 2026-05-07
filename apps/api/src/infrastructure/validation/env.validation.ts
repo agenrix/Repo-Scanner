@@ -12,6 +12,15 @@ export enum NodeEnv {
 const zEnvSchemaHttp = z.object({
   port: z.number().default(3001),
   baseUrl: z.url(),
+  corsOrigins: z
+    .string()
+    .transform((value) =>
+      value
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.url()).min(1)),
 });
 
 const zEnvSchemaPersistence = z.object({

@@ -48,8 +48,16 @@ export class HttpServer implements IHttpServer {
   }
 
   private async setupMiddlewares(app: IHttpApp) {
-    // todo: add cors origins
-    app.use("*", cors());
+    app.use(
+      "*",
+      cors({
+        origin: (origin) =>
+          env.http.corsOrigins.includes(origin) ? origin : null,
+        credentials: true,
+        allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowHeaders: ["Content-Type", "Authorization", "X-Request-Id"],
+      }),
+    );
 
     app.use("*", await this.requestIdMiddleware.init());
 

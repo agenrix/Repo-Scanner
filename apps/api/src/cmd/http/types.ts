@@ -1,11 +1,9 @@
 import type { Context, Hono, MiddlewareHandler } from "hono";
+import type { authentication } from "~/infrastructure/config/better-auth.config";
 
 export type IHttpVariables = {
   requestId: string;
-  authentication: {
-    session: unknown;
-    user: unknown;
-  } | null;
+  authentication: typeof authentication.$Infer.Session | null;
 };
 
 export type IHttpBindings = {

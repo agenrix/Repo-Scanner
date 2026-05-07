@@ -7,4 +7,5 @@ export default defineConfig({
   },
   casing: "snake_case",
   out: "./src/migrations",
+  schema: "./src/schema/index.ts",
 });

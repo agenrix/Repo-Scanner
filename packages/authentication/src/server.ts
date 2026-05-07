@@ -22,6 +22,7 @@ export interface AuthenticationServerClientOptions {
   baseUrl: string;
   basePath: string;
   secret?: string;
+  socialProviders?: Parameters<typeof betterAuth>[0]["socialProviders"];
   trustedOrigins?: string[];
   plugins?: BetterAuthPlugin[];
 }
@@ -31,6 +32,7 @@ export const createAuthenticationServerClient = ({
   basePath,
   baseUrl,
   plugins = [],
+  socialProviders,
   trustedOrigins,
   secret,
 }: AuthenticationServerClientOptions) =>
@@ -39,6 +41,7 @@ export const createAuthenticationServerClient = ({
     basePath,
     database: drizzleAdapter(pg, { provider: "pg", schema }),
     baseURL: baseUrl,
+    socialProviders,
     plugins: [...plugins, dash(), tanstackStartCookies()],
     trustedOrigins,
     secret,
