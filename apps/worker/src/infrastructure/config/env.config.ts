@@ -1,11 +1,12 @@
+import { LogLevel } from "@agenrix/logger";
 import { createEnv } from "@t3-oss/env-core";
 import z from "zod";
 
 export const env = createEnv({
   server: {
-    LOG_LEVEL: z
-      .enum(["fatal", "error", "warn", "info", "debug", "trace"])
-      .default("info"),
+    APP_NAME: z.string().default("@agenrix/worker"),
+    NODE_ENV: z.enum(["development", "production"]),
+    LOG_LEVEL: z.enum(LogLevel).default(LogLevel.INFO),
     PORT: z.coerce.number().default(3000),
     GOOGLE_GENERATIVE_AI_API_KEY: z.string(),
     E2B_API_KEY: z.string(),

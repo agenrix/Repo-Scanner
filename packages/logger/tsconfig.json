@@ -25,15 +25,6 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false,
-
-    // decorators
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-
-    // alias
-    "paths": {
-      "~/*": ["./src/*"]
-    }
+    "noPropertyAccessFromIndexSignature": false
   }
 }

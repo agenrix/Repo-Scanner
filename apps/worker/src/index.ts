@@ -2,15 +2,15 @@ import { cors } from "hono/cors";
 import { Hono } from "hono/tiny";
 import { pinoLogger } from "hono-pino";
 import { serve } from "inngest/hono";
-import { env } from "./infrastructure/config/env.config.infrastructure";
+import { env } from "./infrastructure/config/env.config";
+import { inngestClient } from "./infrastructure/inngest/inngest.infrastructure";
+import { repositoryAnalysisWorkflow } from "./infrastructure/inngest/workflows/agent/repository-analysis.workflow";
 import {
   generalLogger,
   httpLogger,
-} from "./infrastructure/logger/pino.logger.infrastructure";
-import { inngestClient } from "./infrastructure/workflows/inngest.workflows.infrastructure";
+} from "./infrastructure/logger/logger.infrastructure";
 import { setupMiddleware } from "./middlewares/setup.middleware";
 import router from "./router";
-import { repositoryAnalysisWorkflow } from "./workflows/agent/repository-analysis.workflow";
 
 const app = new Hono();
 

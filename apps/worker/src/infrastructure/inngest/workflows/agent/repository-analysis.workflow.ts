@@ -5,10 +5,10 @@ import z from "zod";
 import { google } from "~/ai/provider/google.provider.ai";
 import { RepositoryAnalysisSkill } from "~/ai/skills/repository-analysis.skill.ai";
 import { OPENCODE_CONFIG } from "~/constants/opencode-config.constants";
-import { env } from "~/infrastructure/config/env.config.infrastructure";
-import { generalLogger } from "~/infrastructure/logger/pino.logger.infrastructure";
-import { zGithubRepository } from "~/infrastructure/validation/atoms/github.atom.validation";
-import { inngestClient } from "~/infrastructure/workflows/inngest.workflows.infrastructure";
+import { env } from "~/infrastructure/config/env.config";
+import { inngestClient } from "~/infrastructure/inngest/inngest.infrastructure";
+import { generalLogger } from "~/infrastructure/logger/logger.infrastructure";
+import { zGithubRepository } from "~/infrastructure/validation/atoms/github.atom";
 
 type IAnalyzeRepositoryEventParams = {
   repository: string;
