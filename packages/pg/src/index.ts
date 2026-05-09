@@ -2,16 +2,20 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-type PgClient = ReturnType<typeof postgres>;
+type PgClientType = ReturnType<typeof postgres>;
 
-declare global {
-  var __agenrixPgClient: PgClient | undefined;
-}
+/**
+ * Cache the database connection in development. This avoids creating a new connection on every HMR
+ * update.
+ */
+const globalForDb = globalThis as unknown as {
+  client: PgClientType | undefined;
+};
 
 const pgClient =
-  globalThis.__agenrixPgClient ?? postgres(process.env.POSTGRES_URL as string);
+  globalForDb.client ?? postgres(process.env.POSTGRES_URL as string);
 
-globalThis.__agenrixPgClient = pgClient;
+if (process.env.NODE_ENV !== "production") globalForDb.client = pgClient;
 
 export const pg = drizzle({
   casing: "snake_case",

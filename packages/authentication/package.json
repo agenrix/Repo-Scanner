@@ -2,6 +2,9 @@
   "name": "@agenrix/authentication",
   "type": "module",
   "private": true,
+  "scripts": {
+    "generate": "bunx @better-auth/cli generate --config src/server.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

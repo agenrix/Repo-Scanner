@@ -50,3 +50,9 @@ export const createAuthenticationServerClient = ({
       },
     },
   });
+
+// export const auth = createAuthenticationServerClient({
+//   appName: "@agenrix/authentication",
+//   basePath: "/v1/authentication",
+//   baseUrl: "http://localhost:3001",
+// });
