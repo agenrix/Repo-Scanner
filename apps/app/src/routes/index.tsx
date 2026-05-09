@@ -2,6 +2,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    return redirect({ to: "/auth/login" });
+    return redirect({ to: "/login" });
   },
 });

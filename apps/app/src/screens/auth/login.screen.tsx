@@ -14,7 +14,7 @@ export default function AuthLoginScreen() {
     try {
       const { error } = await authClient.signIn.social({
         provider: "github",
-        callbackURL: `${env.VITE_BASE_URL}/auth/onboarding`,
+        callbackURL: `${env.VITE_BASE_URL}/onboarding`,
       });
 
       if (error) {
