@@ -5,11 +5,13 @@ import type { IHttpRouter } from "../router";
 import type { IHttpApp } from "../types";
 
 @injectable()
-export class HealthRouter implements IHttpRouter {
+export class UserRouter implements IHttpRouter {
   constructor(
-    @inject(HTTP_SYMBOL.Route.Health) private readonly healthRoute: IHttpRoute,
+    @inject(HTTP_SYMBOL.Route.User.Authentication)
+    private readonly userProfileRoute: IHttpRoute,
   ) {}
+
   async init(path: string, app: IHttpApp): Promise<void> {
-    app.route(`${path}`, await this.healthRoute.init());
+    app.route(`${path}/profile`, await this.userProfileRoute.init());
   }
 }

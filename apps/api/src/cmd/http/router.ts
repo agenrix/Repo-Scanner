@@ -9,10 +9,10 @@ export interface IHttpRouter {
 @injectable()
 export class BootstrapRouter implements IHttpRouter {
   constructor(
-    @inject(HTTP_SYMBOL.Router.Health)
-    private readonly healthRouter: IHttpRouter,
+    @inject(HTTP_SYMBOL.Router.User)
+    private readonly userRouter: IHttpRouter,
   ) {}
   async init(path: string, app: IHttpApp): Promise<void> {
-    await this.healthRouter.init(`${path}/health`, app);
+    await this.userRouter.init(`${path}/user`, app);
   }
 }

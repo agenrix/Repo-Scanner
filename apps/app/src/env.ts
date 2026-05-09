@@ -14,6 +14,7 @@ export const env = createEnv({
 
   client: {
     VITE_API_URL: z.url(),
+    VITE_BASE_URL: z.url(),
   },
 
   /**
@@ -21,8 +22,8 @@ export const env = createEnv({
    * `process.env` or `import.meta.env`.
    */
   runtimeEnv: {
-    NODE_ENV: process.env.NODE_ENV,
-    VITE_API_URL: import.meta.env.VITE_API_URL,
+    ...import.meta.env,
+    NODE_ENV: import.meta.env.PROD ? "production" : "development",
   },
 
   /**

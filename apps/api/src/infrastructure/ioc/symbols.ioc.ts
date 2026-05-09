@@ -4,16 +4,19 @@ export const INFRASTRUCTURE_SYMBOL = {
 
 export const HTTP_SYMBOL = {
   Route: {
-    Health: Symbol.for("HealthRoute"),
+    User: {
+      Authentication: Symbol.for("AuthenticationUserRoute"),
+    },
   },
 
   Router: {
     Bootstrap: Symbol.for("BootstrapRouter"),
-    Health: Symbol.for("HealthRouter"),
+    User: Symbol.for("UserRotuer"),
   },
 
   Middleware: {
     RequestId: Symbol.for("RequestIdMiddleware"),
+    Authentication: Symbol.for("AuthenticationMiddleware"),
   },
 
   Server: Symbol.for("HttpServer"),

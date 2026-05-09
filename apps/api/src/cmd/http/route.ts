@@ -38,18 +38,19 @@ export const RequestSchema = <
 type AnyRequestSchema = ReturnType<typeof RequestSchema>;
 type AuthenticationContext = NonNullable<IHttpContext["var"]["authentication"]>;
 type RouteAuthentication<TAuthenticated extends boolean> =
-  TAuthenticated extends true ? AuthenticationContext : null;
+  TAuthenticated extends true
+    ? { authentication: AuthenticationContext }
+    : { authentication?: AuthenticationContext };
 
-export interface RequestContext<
+export type RequestContext<
   TRequestSchema extends AnyRequestSchema,
   TResponseSchema extends AnyResponseSchema,
   TAuthenticated extends boolean,
-> {
+> = {
   data: z.output<TRequestSchema>;
   response: IResponseUtils<TResponseSchema>;
-  authentication: RouteAuthentication<TAuthenticated>;
   logger: PinoLogger;
-}
+} & RouteAuthentication<TAuthenticated>;
 
 type RouteHandler<
   TRequestSchema extends AnyRequestSchema,
@@ -166,14 +167,16 @@ export abstract class HttpRoute implements IHttpRoute {
           });
         }
 
-        return await handler({
+        const requestContext = {
           data: validationResult.data,
           response,
-          authentication: (authenticated
-            ? ctx.var.authentication
-            : null) as RouteAuthentication<TAuthenticated>,
           logger: this.logger.general.child({ reqId: ctx.var.requestId }),
-        });
+          ...(ctx.var.authentication !== null
+            ? { authentication: ctx.var.authentication }
+            : {}),
+        } as RequestContext<TRequestSchema, TResponseSchema, TAuthenticated>;
+
+        return await handler(requestContext);
       } catch (error) {
         this.logger.general.error({ error, requestId: ctx.var.requestId });
         return response.somethingWentWrong();

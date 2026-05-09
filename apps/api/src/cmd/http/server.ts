@@ -12,6 +12,10 @@ import type { ILogger } from "~/infrastructure/logger/logger.infrastructure";
 import type { IHttpRouter } from "./router";
 import type { IHttpApp, IHttpMiddleware } from "./types";
 
+declare global {
+  var __agenrixApiServer: Bun.Server<unknown> | undefined;
+}
+
 export interface IHttpServer {
   init(): Promise<void>;
 }
@@ -27,6 +31,9 @@ export class HttpServer implements IHttpServer {
 
     @inject(HTTP_SYMBOL.Middleware.RequestId)
     private readonly requestIdMiddleware: IHttpMiddleware,
+
+    @inject(HTTP_SYMBOL.Middleware.Authentication)
+    private readonly authenticationMiddleware: IHttpMiddleware,
   ) {}
 
   async init(): Promise<void> {
@@ -60,6 +67,7 @@ export class HttpServer implements IHttpServer {
     );
 
     app.use("*", await this.requestIdMiddleware.init());
+    app.use("*", await this.authenticationMiddleware.init());
 
     app.use(
       "*",
@@ -73,11 +81,27 @@ export class HttpServer implements IHttpServer {
   }
 
   private async start(app: IHttpApp): Promise<void> {
-    const server = Bun.serve({
+    let server = globalThis.__agenrixApiServer;
+
+    if (server !== undefined && server.port === env.http.port) {
+      server.reload({ fetch: app.fetch });
+
+      this.logger.general.info(
+        `Server hot reloaded on http://${server.hostname}:${server.port}`,
+      );
+
+      return;
+    }
+
+    server?.stop(true);
+
+    server = Bun.serve({
       fetch: app.fetch,
       port: env.http.port,
       hostname: "0.0.0.0",
     });
+
+    globalThis.__agenrixApiServer = server;
 
     this.logger.general.info(
       `Server listening on http://${server.hostname}:${server.port}`,

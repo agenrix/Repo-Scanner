@@ -5,10 +5,9 @@ import {
   userSchema,
   verificationSchema,
 } from "@agenrix/pg/schema";
-import { dash } from "@better-auth/infra";
 import { type BetterAuthPlugin, betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { tanstackStartCookies } from "better-auth/tanstack-start";
+import { organization } from "better-auth/plugins";
 
 export const schema = {
   user: userSchema,
@@ -42,7 +41,7 @@ export const createAuthenticationServerClient = ({
     database: drizzleAdapter(pg, { provider: "pg", schema }),
     baseURL: baseUrl,
     socialProviders,
-    plugins: [...plugins, dash(), tanstackStartCookies()],
+    plugins: [...plugins, organization()],
     trustedOrigins,
     secret,
     advanced: {

@@ -6,7 +6,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-
+import { Toaster } from "~/components/ui/sonner";
 import globalsCss from "../styles/globals.css?url";
 
 export interface IRootRouteContext {
@@ -56,6 +56,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             },
           ]}
         />
+        <Toaster position="top-center" />
         <Scripts />
       </body>
     </html>
