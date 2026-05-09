@@ -32,7 +32,9 @@ export default function AuthLoginScreen() {
   return (
     <div className="flex w-full flex-col items-center gap-10">
       <div className="space-y-2">
-        <h1 className="text-center font-medium text-2xl">Welcome to Agenrix</h1>
+        <h1 className="text-center font-heading font-medium text-2xl">
+          Welcome to Agenrix
+        </h1>
         <p className="text-center text-muted-foreground text-sm">
           Sign in or create an account
         </p>
