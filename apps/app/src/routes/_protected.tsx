@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useAuthentication } from "~/hooks/authentication/use-authentication";
-import AuthRootScren from "~/screens/auth/root.screen";
 
-export const Route = createFileRoute("/_auth")({
+export const Route = createFileRoute("/_protected")({
   beforeLoad: ({ location: { pathname } }) =>
     useAuthentication({ data: { pathname } }),
-  component: AuthRootScren,
 });
