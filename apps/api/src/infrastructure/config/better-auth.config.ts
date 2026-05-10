@@ -1,11 +1,13 @@
 import { createAuthenticationServerClient } from "@agenrix/authentication/server";
 import { openAPI } from "@agenrix/authentication/server-plugins";
 import { env } from "./env.config";
+import { postgres } from "./postgres.config";
 
 export const authentication = createAuthenticationServerClient({
   appName: env.name,
   baseUrl: env.http.baseUrl,
   basePath: "/v1/authentication",
+  database: postgres,
   secret: env.authentication.secret,
   socialProviders: {
     github: {
@@ -16,3 +18,5 @@ export const authentication = createAuthenticationServerClient({
   plugins: [openAPI()],
   trustedOrigins: env.http.corsOrigins,
 });
+
+export type Authentication = typeof authentication;

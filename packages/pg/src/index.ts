@@ -1,24 +1,33 @@
-import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-type PgClientType = ReturnType<typeof postgres>;
+export interface PostgresOptions {
+  url: string;
+}
 
 /**
  * Cache the database connection in development. This avoids creating a new connection on every HMR
  * update.
  */
 const globalForDb = globalThis as unknown as {
-  client: PgClientType | undefined;
+  client: postgres.Sql | undefined;
 };
 
-const pgClient =
-  globalForDb.client ?? postgres(process.env.POSTGRES_URL as string);
+export const createPostgres = ({ url }: PostgresOptions) => {
+  const client = globalForDb.client ?? postgres(url);
 
-if (process.env.NODE_ENV !== "production") globalForDb.client = pgClient;
+  if (process.env.NODE_ENV !== "production") {
+    globalForDb.client = client;
+  }
 
-export const pg = drizzle({
-  casing: "snake_case",
-  client: pgClient,
-  schema,
-});
+  return drizzle({
+    casing: "snake_case",
+    client,
+    schema,
+  });
+};
+
+export type Postgres = PostgresJsDatabase<typeof schema> & {
+  $client: postgres.Sql;
+};

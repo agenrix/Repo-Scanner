@@ -15,6 +15,13 @@
       "when": 1778339163032,
       "tag": "0001_smart_living_lightning",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778351417683,
+      "tag": "0002_damp_hellfire_club",
+      "breakpoints": true
     }
   ]
 }

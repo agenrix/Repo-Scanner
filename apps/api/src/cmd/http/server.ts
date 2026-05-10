@@ -9,12 +9,9 @@ import {
   INFRASTRUCTURE_SYMBOL,
 } from "~/infrastructure/ioc/symbols.ioc";
 import type { ILogger } from "~/infrastructure/logger/logger.infrastructure";
+import type { IPostgresPersistence } from "~/infrastructure/persistence/postgres.persistence";
 import type { IHttpRouter } from "./router";
 import type { IHttpApp, IHttpMiddleware } from "./types";
-
-declare global {
-  var __agenrixApiServer: Bun.Server<unknown> | undefined;
-}
 
 export interface IHttpServer {
   init(): Promise<void>;
@@ -34,10 +31,14 @@ export class HttpServer implements IHttpServer {
 
     @inject(HTTP_SYMBOL.Middleware.Authentication)
     private readonly authenticationMiddleware: IHttpMiddleware,
+
+    @inject(INFRASTRUCTURE_SYMBOL.Postgres)
+    private readonly postgres: IPostgresPersistence,
   ) {}
 
   async init(): Promise<void> {
-    this.logger.init(env.logLevel);
+    await this.logger.init(env.logLevel);
+    await this.postgres.init();
     this.logger.general.info("Initializing server...");
 
     const app: IHttpApp = new Hono();
@@ -81,30 +82,28 @@ export class HttpServer implements IHttpServer {
   }
 
   private async start(app: IHttpApp): Promise<void> {
-    let server = globalThis.__agenrixApiServer;
-
-    if (server !== undefined && server.port === env.http.port) {
-      server.reload({ fetch: app.fetch });
-
-      this.logger.general.info(
-        `Server hot reloaded on http://${server.hostname}:${server.port}`,
-      );
-
-      return;
-    }
-
-    server?.stop(true);
-
-    server = Bun.serve({
+    const server = Bun.serve({
       fetch: app.fetch,
       port: env.http.port,
       hostname: "0.0.0.0",
     });
 
-    globalThis.__agenrixApiServer = server;
-
     this.logger.general.info(
       `Server listening on http://${server.hostname}:${server.port}`,
     );
+
+    // graceful shutdown
+    process.on("SIGINT", () => {
+      this.shutdown(server);
+      process.exit(0);
+    });
+    process.on("SIGTERM", () => {
+      this.shutdown(server);
+    });
+  }
+
+  private async shutdown(server: Bun.Server<undefined>): Promise<void> {
+    await this.postgres.close();
+    await server.stop();
   }
 }

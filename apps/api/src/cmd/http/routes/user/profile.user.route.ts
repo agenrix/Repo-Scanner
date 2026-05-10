@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import z from "zod";
-import type { authentication } from "~/infrastructure/config/better-auth.config";
+import type { Authentication } from "~/infrastructure/config/better-auth.config";
 import { INFRASTRUCTURE_SYMBOL } from "~/infrastructure/ioc/symbols.ioc";
 import type { ILogger } from "~/infrastructure/logger/logger.infrastructure";
 import {
@@ -75,7 +75,7 @@ export class UserProfileRoute extends HttpRoute {
   }
 
   private serializeUser(
-    user: typeof authentication.$Infer.Session.user,
+    user: Authentication["$Infer"]["Session"]["user"],
   ): IzUserResponseMinimal {
     return {
       id: user.id,

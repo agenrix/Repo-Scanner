@@ -1,4 +1,4 @@
-import { pg } from "@agenrix/pg";
+import type { Postgres } from "@agenrix/pg";
 import {
   accountSchema,
   sessionSchema,
@@ -20,7 +20,8 @@ export interface AuthenticationServerClientOptions {
   appName: string;
   baseUrl: string;
   basePath: string;
-  secret?: string;
+  database: Postgres;
+  secret: string;
   socialProviders?: Parameters<typeof betterAuth>[0]["socialProviders"];
   trustedOrigins?: string[];
   plugins?: BetterAuthPlugin[];
@@ -30,6 +31,7 @@ export const createAuthenticationServerClient = ({
   appName,
   basePath,
   baseUrl,
+  database,
   plugins = [],
   socialProviders,
   trustedOrigins,
@@ -38,7 +40,10 @@ export const createAuthenticationServerClient = ({
   betterAuth({
     appName,
     basePath,
-    database: drizzleAdapter(pg, { provider: "pg", schema }),
+    database: drizzleAdapter(database, {
+      provider: "pg",
+      schema,
+    }),
     baseURL: baseUrl,
     socialProviders,
     plugins: [...plugins, organization()],

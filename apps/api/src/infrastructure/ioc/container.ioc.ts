@@ -8,12 +8,19 @@ import { UserProfileRoute } from "~/cmd/http/routes/user/profile.user.route";
 import { HttpServer, type IHttpServer } from "~/cmd/http/server";
 import type { IHttpMiddleware } from "~/cmd/http/types";
 import { type ILogger, Logger } from "../logger/logger.infrastructure";
+import {
+  type IPostgresPersistence,
+  PostgresPersistence,
+} from "../persistence/postgres.persistence";
 import { HTTP_SYMBOL, INFRASTRUCTURE_SYMBOL } from "./symbols.ioc";
 
 export const container = new Container({ defaultScope: "Singleton" });
 
 // infrastructure
 container.bind<ILogger>(INFRASTRUCTURE_SYMBOL.Logger).to(Logger);
+container
+  .bind<IPostgresPersistence>(INFRASTRUCTURE_SYMBOL.Postgres)
+  .to(PostgresPersistence);
 
 // routes
 container

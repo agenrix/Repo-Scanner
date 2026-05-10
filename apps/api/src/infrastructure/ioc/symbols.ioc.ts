@@ -1,5 +1,6 @@
 export const INFRASTRUCTURE_SYMBOL = {
   Logger: Symbol.for("Logger"),
+  Postgres: Symbol.for("Postgres"),
 } as const;
 
 export const HTTP_SYMBOL = {
