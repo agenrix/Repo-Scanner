@@ -3,8 +3,9 @@ import HomeSidebar from "~/components/home/sidebar/index.sidebar.component";
 import { SidebarProvider } from "~/components/ui/sidebar";
 import { Route as ProtectedRoute } from "~/routes/_protected";
 
-export default function OrganizationsLayoutScreen() {
+export default function HomeLayoutScreen() {
   const { session } = ProtectedRoute.useRouteContext();
+
   return (
     <SidebarProvider>
       <HomeSidebar
@@ -12,7 +13,7 @@ export default function OrganizationsLayoutScreen() {
         organizations={session.organizations}
         activeOrganization={session.activeOrganization}
       />
-      <main className="flex min-h-screen min-w-0 flex-1 items-center justify-center overflow-hidden p-6">
+      <main className="min-h-0 min-w-0 flex-1">
         <Outlet />
       </main>
     </SidebarProvider>

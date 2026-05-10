@@ -12,9 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as ProtectedOrganizationsRouteImport } from './routes/_protected/organizations'
+import { Route as ProtectedHomeRouteImport } from './routes/_protected/_home'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedOrganizationsIndexRouteImport } from './routes/_protected/organizations/index'
-import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/_dashboard/index'
+import { Route as ProtectedHomeIndexRouteImport } from './routes/_protected/_home/index'
 import { Route as ProtectedOrganizationsNewRouteImport } from './routes/_protected/organizations/new'
 
 const ProtectedRoute = ProtectedRouteImport.update({
@@ -30,6 +31,10 @@ const ProtectedOrganizationsRoute = ProtectedOrganizationsRouteImport.update({
   path: '/organizations',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedHomeRoute = ProtectedHomeRouteImport.update({
+  id: '/_home',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -41,10 +46,10 @@ const ProtectedOrganizationsIndexRoute =
     path: '/',
     getParentRoute: () => ProtectedOrganizationsRoute,
   } as any)
-const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
-  id: '/_dashboard/',
+const ProtectedHomeIndexRoute = ProtectedHomeIndexRouteImport.update({
+  id: '/',
   path: '/',
-  getParentRoute: () => ProtectedRoute,
+  getParentRoute: () => ProtectedHomeRoute,
 } as any)
 const ProtectedOrganizationsNewRoute =
   ProtectedOrganizationsNewRouteImport.update({
@@ -54,14 +59,14 @@ const ProtectedOrganizationsNewRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof ProtectedDashboardIndexRoute
+  '/': typeof ProtectedHomeIndexRoute
   '/login': typeof AuthLoginRoute
   '/organizations': typeof ProtectedOrganizationsRouteWithChildren
   '/organizations/new': typeof ProtectedOrganizationsNewRoute
   '/organizations/': typeof ProtectedOrganizationsIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof ProtectedDashboardIndexRoute
+  '/': typeof ProtectedHomeIndexRoute
   '/login': typeof AuthLoginRoute
   '/organizations/new': typeof ProtectedOrganizationsNewRoute
   '/organizations': typeof ProtectedOrganizationsIndexRoute
@@ -71,9 +76,10 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_protected': typeof ProtectedRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
+  '/_protected/_home': typeof ProtectedHomeRouteWithChildren
   '/_protected/organizations': typeof ProtectedOrganizationsRouteWithChildren
   '/_protected/organizations/new': typeof ProtectedOrganizationsNewRoute
-  '/_protected/_dashboard/': typeof ProtectedDashboardIndexRoute
+  '/_protected/_home/': typeof ProtectedHomeIndexRoute
   '/_protected/organizations/': typeof ProtectedOrganizationsIndexRoute
 }
 export interface FileRouteTypes {
@@ -91,9 +97,10 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_protected'
     | '/_auth/login'
+    | '/_protected/_home'
     | '/_protected/organizations'
     | '/_protected/organizations/new'
-    | '/_protected/_dashboard/'
+    | '/_protected/_home/'
     | '/_protected/organizations/'
   fileRoutesById: FileRoutesById
 }
@@ -125,6 +132,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedOrganizationsRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/_home': {
+      id: '/_protected/_home'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ProtectedHomeRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_auth/login': {
       id: '/_auth/login'
       path: '/login'
@@ -139,12 +153,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedOrganizationsIndexRouteImport
       parentRoute: typeof ProtectedOrganizationsRoute
     }
-    '/_protected/_dashboard/': {
-      id: '/_protected/_dashboard/'
+    '/_protected/_home/': {
+      id: '/_protected/_home/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
-      parentRoute: typeof ProtectedRoute
+      preLoaderRoute: typeof ProtectedHomeIndexRouteImport
+      parentRoute: typeof ProtectedHomeRoute
     }
     '/_protected/organizations/new': {
       id: '/_protected/organizations/new'
@@ -166,6 +180,18 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface ProtectedHomeRouteChildren {
+  ProtectedHomeIndexRoute: typeof ProtectedHomeIndexRoute
+}
+
+const ProtectedHomeRouteChildren: ProtectedHomeRouteChildren = {
+  ProtectedHomeIndexRoute: ProtectedHomeIndexRoute,
+}
+
+const ProtectedHomeRouteWithChildren = ProtectedHomeRoute._addFileChildren(
+  ProtectedHomeRouteChildren,
+)
+
 interface ProtectedOrganizationsRouteChildren {
   ProtectedOrganizationsNewRoute: typeof ProtectedOrganizationsNewRoute
   ProtectedOrganizationsIndexRoute: typeof ProtectedOrganizationsIndexRoute
@@ -183,13 +209,13 @@ const ProtectedOrganizationsRouteWithChildren =
   )
 
 interface ProtectedRouteChildren {
+  ProtectedHomeRoute: typeof ProtectedHomeRouteWithChildren
   ProtectedOrganizationsRoute: typeof ProtectedOrganizationsRouteWithChildren
-  ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedHomeRoute: ProtectedHomeRouteWithChildren,
   ProtectedOrganizationsRoute: ProtectedOrganizationsRouteWithChildren,
-  ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(

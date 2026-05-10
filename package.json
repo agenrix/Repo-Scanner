@@ -17,6 +17,7 @@
     "@biomejs/biome": "2.4.14",
     "@types/bun": "latest",
     "lefthook": "^2.1.6",
+    "shadcn": "^4.7.0",
     "turbo": "^2.9.12"
   },
   "peerDependencies": {
