@@ -1,11 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useAuthentication } from "~/hooks/authentication/use-authentication";
+import { getSession } from "~/hooks/authentication/get-session.hook";
 
 export const Route = createFileRoute("/_protected")({
   beforeLoad: async ({ location, context: { queryClient } }) => {
     const { session } = await queryClient.ensureQueryData({
       queryKey: ["user", "session"],
-      queryFn: () => useAuthentication(),
+      queryFn: () => getSession(),
     });
 
     if (!session) {

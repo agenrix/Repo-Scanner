@@ -5,6 +5,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { nanoid } from "nanoid";
 import { Controller, useForm } from "react-hook-form";
 import slugify from "slugify";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import * as FieldComponent from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
@@ -37,9 +38,14 @@ export default function CreateOrganizationForm() {
         onSuccess: async () => {
           await queryClient.invalidateQueries({
             queryKey: ["user", "session"],
-            refetchType: "all",
           });
           await navigate({ to: "/organizations" });
+        },
+        onError: ({ error }) => {
+          toast.error("Failed to create organization", {
+            description: error.message,
+            richColors: true,
+          });
         },
       },
     });

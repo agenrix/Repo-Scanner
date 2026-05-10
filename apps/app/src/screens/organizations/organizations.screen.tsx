@@ -1,22 +1,60 @@
 import { PlusIcon } from "@phosphor-icons/react";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { Link, Navigate, useNavigate } from "@tanstack/react-router";
+import React from "react";
+import { toast } from "sonner";
+import { SubmitButton } from "~/components/common/submit-button.component";
 import * as AvatarComponent from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
-import { useAuthentication as getAuthentication } from "~/hooks/authentication/use-authentication";
+import { getSession } from "~/hooks/authentication/get-session.hook";
+import { authClient } from "~/lib/auth/client";
 
 export default function OrganizationsScreen() {
-  const { data } = useSuspenseQuery({
+  const [launchingOrganizationId, setLaunchingOrganizationId] = React.useState<
+    string | null
+  >(null);
+
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const {
+    data: { session },
+  } = useSuspenseQuery({
     queryKey: ["user", "session"],
-    queryFn: () => getAuthentication(),
+    queryFn: () => getSession(),
   });
-  const { session } = data;
 
   if (!session) {
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   const firstName = session.user.name.split(" ").at(0) ?? session.user.name;
+
+  async function handleOrganizationLaunch(organizationId: string) {
+    await authClient.organization.setActive({
+      organizationId,
+      fetchOptions: {
+        onRequest: () => {
+          setLaunchingOrganizationId(organizationId);
+        },
+        onError: ({ error }) => {
+          toast.error("Failed to launch organization", {
+            richColors: true,
+            description: error.message,
+          });
+          setLaunchingOrganizationId(null);
+        },
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({
+            queryKey: ["user", "session"],
+          });
+
+          await navigate({ to: "/" });
+          setLaunchingOrganizationId(null);
+        },
+      },
+    });
+  }
 
   return (
     <div className="relative z-20 m-auto flex w-full max-w-120 flex-col">
@@ -36,34 +74,43 @@ export default function OrganizationsScreen() {
           </span>
           <div className="max-h-65 overflow-y-auto">
             <div className="divide-y divide-border">
-              {session.organizations.map((organization) => (
-                <div
-                  key={organization.id}
-                  className="flex min-h-14 w-full items-center justify-between gap-4 py-2"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <AvatarComponent.Avatar className="rounded-none">
-                      {organization.logo && (
-                        <AvatarComponent.AvatarImage
-                          alt={organization.name}
-                          className="rounded-none"
-                          src={organization.logo}
-                        />
-                      )}
-                      <AvatarComponent.AvatarFallback className="rounded-none font-medium uppercase">
-                        {organization.name.slice(0, 2)}
-                      </AvatarComponent.AvatarFallback>
-                    </AvatarComponent.Avatar>
-                    <p className="truncate font-medium text-sm">
-                      {organization.name}
-                    </p>
-                  </div>
+              {session.organizations.map((organization) => {
+                const isLaunching = launchingOrganizationId === organization.id;
 
-                  <Button variant="outline" className="px-4">
-                    Launch
-                  </Button>
-                </div>
-              ))}
+                return (
+                  <div
+                    key={organization.id}
+                    className="flex min-h-14 w-full items-center justify-between gap-4 py-2"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <AvatarComponent.Avatar className="rounded-none">
+                        {organization.logo && (
+                          <AvatarComponent.AvatarImage
+                            alt={organization.name}
+                            className="rounded-none"
+                            src={organization.logo}
+                          />
+                        )}
+                        <AvatarComponent.AvatarFallback className="rounded-none font-medium uppercase">
+                          {organization.name.slice(0, 2)}
+                        </AvatarComponent.AvatarFallback>
+                      </AvatarComponent.Avatar>
+                      <p className="truncate font-medium text-sm">
+                        {organization.name}
+                      </p>
+                    </div>
+
+                    <SubmitButton
+                      isSubmitting={isLaunching}
+                      variant={"outline"}
+                      className="px-4"
+                      onClick={() => handleOrganizationLaunch(organization.id)}
+                    >
+                      Launch
+                    </SubmitButton>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </>

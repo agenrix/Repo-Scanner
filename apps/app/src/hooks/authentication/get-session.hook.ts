@@ -12,7 +12,7 @@ interface IResponse {
   } | null;
 }
 
-export const useAuthentication = createServerFn({ method: "GET" }).handler(
+export const getSession = createServerFn({ method: "GET" }).handler(
   async () => {
     const requestHeaders = getRequestHeaders();
     const cookie = requestHeaders.get("cookie");

@@ -31,12 +31,7 @@ export default function UserAvatar({ user }: UserAvatarProps) {
           });
         },
         onSuccess: async () => {
-          queryClient.removeQueries({ queryKey: ["user", "session"] });
-
-          toast.success("Successfully signed out!", {
-            richColors: true,
-            id: toastId.current,
-          });
+          queryClient.invalidateQueries({ queryKey: ["user", "session"] });
 
           await navigate({ to: "/login", replace: true });
         },
