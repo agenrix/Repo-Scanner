@@ -7,11 +7,11 @@ export default class RequestIdMiddleware implements IHttpMiddleware {
   async init(): Promise<IHttpMiddlewareHandler> {
     return async (ctx, next) => {
       const requestId = ulid();
-      ctx.set("requestId", requestId);
+      ctx.set("reqId", requestId);
 
       ctx.header("X-Request-Id", requestId);
 
-      await next();
+      return await next();
     };
   }
 }

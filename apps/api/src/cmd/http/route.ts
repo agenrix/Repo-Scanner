@@ -50,6 +50,7 @@ export type RequestContext<
   data: z.output<TRequestSchema>;
   response: IResponseUtils<TResponseSchema>;
   logger: PinoLogger;
+  headers: Headers;
 } & RouteAuthentication<TAuthenticated>;
 
 type RouteHandler<
@@ -170,15 +171,16 @@ export abstract class HttpRoute implements IHttpRoute {
         const requestContext = {
           data: validationResult.data,
           response,
-          logger: this.logger.general.child({ reqId: ctx.var.requestId }),
+          logger: this.logger.general.child({ reqId: ctx.var.reqId }),
           ...(ctx.var.authentication !== null
             ? { authentication: ctx.var.authentication }
             : {}),
+          headers: ctx.req.raw.headers,
         } as RequestContext<TRequestSchema, TResponseSchema, TAuthenticated>;
 
         return await handler(requestContext);
       } catch (error) {
-        this.logger.general.error({ error, requestId: ctx.var.requestId });
+        this.logger.general.error({ error, reqId: ctx.var.reqId });
         return response.somethingWentWrong();
       }
     };

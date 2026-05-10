@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/jetbrains-mono";
 @import "@fontsource-variable/manrope/wght.css";
+@import "@fontsource-variable/inter";
 
 * {
   box-sizing: border-box;

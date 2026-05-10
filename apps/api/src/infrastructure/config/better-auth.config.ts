@@ -19,4 +19,4 @@ export const authentication = createAuthenticationServerClient({
   trustedOrigins: env.http.corsOrigins,
 });
 
-export type Authentication = typeof authentication;
+export type IAuthentication = typeof authentication.$Infer;

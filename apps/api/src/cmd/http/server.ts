@@ -75,7 +75,7 @@ export class HttpServer implements IHttpServer {
       pinoLogger({
         pino: this.logger.http,
         http: {
-          referRequestIdKey: "requestId",
+          referRequestIdKey: "reqId",
         },
       }),
     );

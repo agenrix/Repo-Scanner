@@ -4,7 +4,7 @@ import RequestIdMiddleware from "~/cmd/http/middlewares/request-id.middleware";
 import type { IHttpRoute } from "~/cmd/http/route";
 import { BootstrapRouter, type IHttpRouter } from "~/cmd/http/router";
 import { UserRouter } from "~/cmd/http/routers/user.router";
-import { UserProfileRoute } from "~/cmd/http/routes/user/profile.user.route";
+import { UserProfileRoute } from "~/cmd/http/routes/user/session.user.route";
 import { HttpServer, type IHttpServer } from "~/cmd/http/server";
 import type { IHttpMiddleware } from "~/cmd/http/types";
 import { type ILogger, Logger } from "../logger/logger.infrastructure";

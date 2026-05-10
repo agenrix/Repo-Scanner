@@ -15,7 +15,7 @@ export default class AuthenticationMiddleware implements IHttpMiddleware {
         authenticationResult?.session ? authenticationResult : null,
       );
 
-      await next();
+      return await next();
     };
   }
 }

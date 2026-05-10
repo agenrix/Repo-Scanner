@@ -12,6 +12,6 @@ export class UserRouter implements IHttpRouter {
   ) {}
 
   async init(path: string, app: IHttpApp): Promise<void> {
-    app.route(`${path}/profile`, await this.userProfileRoute.init());
+    app.route(`${path}/session`, await this.userProfileRoute.init());
   }
 }

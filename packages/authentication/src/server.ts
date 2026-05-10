@@ -1,6 +1,9 @@
 import type { Postgres } from "@agenrix/pg";
 import {
   accountSchema,
+  invitationSchema,
+  memberSchema,
+  organizationSchema,
   sessionSchema,
   userSchema,
   verificationSchema,
@@ -14,9 +17,14 @@ export const schema = {
   session: sessionSchema,
   account: accountSchema,
   verification: verificationSchema,
+  organization: organizationSchema,
+  member: memberSchema,
+  invitation: invitationSchema,
 };
 
-export interface AuthenticationServerClientOptions {
+export interface AuthenticationServerClientOptions<
+  TPlugins extends BetterAuthPlugin[] = [],
+> {
   appName: string;
   baseUrl: string;
   basePath: string;
@@ -24,20 +32,27 @@ export interface AuthenticationServerClientOptions {
   secret: string;
   socialProviders?: Parameters<typeof betterAuth>[0]["socialProviders"];
   trustedOrigins?: string[];
-  plugins?: BetterAuthPlugin[];
+  plugins?: TPlugins;
 }
 
-export const createAuthenticationServerClient = ({
+export const createAuthenticationServerClient = <
+  const TPlugins extends BetterAuthPlugin[] = [],
+>({
   appName,
   basePath,
   baseUrl,
   database,
-  plugins = [],
+  plugins,
   socialProviders,
   trustedOrigins,
   secret,
-}: AuthenticationServerClientOptions) =>
-  betterAuth({
+}: AuthenticationServerClientOptions<TPlugins>) => {
+  const authPlugins = [...(plugins ?? []), organization()] as unknown as [
+    ...TPlugins,
+    ReturnType<typeof organization>,
+  ];
+
+  return betterAuth({
     appName,
     basePath,
     database: drizzleAdapter(database, {
@@ -46,7 +61,7 @@ export const createAuthenticationServerClient = ({
     }),
     baseURL: baseUrl,
     socialProviders,
-    plugins: [...plugins, organization()],
+    plugins: authPlugins,
     trustedOrigins,
     secret,
     advanced: {
@@ -55,6 +70,7 @@ export const createAuthenticationServerClient = ({
       },
     },
   });
+};
 
 // export const auth = createAuthenticationServerClient({
 //   appName: "@agenrix/authentication",

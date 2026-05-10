@@ -2,9 +2,9 @@ import { Outlet } from "@tanstack/react-router";
 import { LogoIcon } from "~/assets/icons/logo.svg";
 import LoginHeroImg from "~/assets/images/login-hero.png";
 
-export default function AuthRootScren() {
+export default function AuthLayoutScren() {
   return (
-    <main className="grid min-h-svh bg-background text-foreground lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)]">
+    <main className="grid min-h-svh bg-background text-foreground lg:grid-cols-2">
       <div className="relative hidden min-h-svh overflow-hidden border-border border-r bg-card lg:block">
         <img
           src={LoginHeroImg}

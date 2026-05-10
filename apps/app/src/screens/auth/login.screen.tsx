@@ -1,4 +1,4 @@
-import { GithubLogoIcon } from "@phosphor-icons/react";
+import { GithubLogoIcon, SpinnerIcon } from "@phosphor-icons/react";
 import React from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
@@ -35,7 +35,7 @@ export default function AuthLoginScreen() {
         <h1 className="text-center font-heading font-medium text-2xl">
           Welcome to Agenrix
         </h1>
-        <p className="text-center text-muted-foreground text-sm">
+        <p className="text-center font-medium text-muted-foreground text-sm">
           Sign in or create an account
         </p>
       </div>
@@ -47,8 +47,14 @@ export default function AuthLoginScreen() {
         className="w-full"
         size={"lg"}
       >
-        <GithubLogoIcon weight="duotone" />
-        Continue with GitHub
+        {isSigningIn ? (
+          <SpinnerIcon className="animate-spin" />
+        ) : (
+          <span className="flex items-center gap-1.5">
+            <GithubLogoIcon weight="duotone" />
+            <p>Continue with GitHub</p>
+          </span>
+        )}
       </Button>
     </div>
   );
