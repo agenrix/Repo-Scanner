@@ -86,6 +86,7 @@ export class HttpServer implements IHttpServer {
       fetch: app.fetch,
       port: env.http.port,
       hostname: "0.0.0.0",
+      idleTimeout: 30,
     });
 
     this.logger.general.info(

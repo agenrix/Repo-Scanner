@@ -59,7 +59,7 @@ export default function HomeSidebar({
 }: HomeSidebarProps) {
   const { toggleSidebar, state } = useSidebar();
   return (
-    <SidebarComponent.Sidebar collapsible="icon" className="border-r-0!">
+    <SidebarComponent.Sidebar collapsible="icon">
       <SidebarComponent.SidebarHeader className="flex flex-row items-center justify-between">
         {state === "collapsed" ? (
           <SidebarComponent.SidebarMenu>
