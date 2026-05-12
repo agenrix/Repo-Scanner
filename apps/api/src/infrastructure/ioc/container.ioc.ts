@@ -3,7 +3,10 @@ import AuthenticationMiddleware from "~/cmd/http/middlewares/authentication.midd
 import RequestIdMiddleware from "~/cmd/http/middlewares/request-id.middleware";
 import type { IHttpRoute } from "~/cmd/http/route";
 import { BootstrapRouter, type IHttpRouter } from "~/cmd/http/router";
+import { IntegrationsRouter } from "~/cmd/http/routers/integrations.router";
 import { UserRouter } from "~/cmd/http/routers/user.router";
+import { GithubIntegrationCallbackRoute } from "~/cmd/http/routes/integrations/github/callback.github.integration.route";
+import { GithubIntegrationRoute } from "~/cmd/http/routes/integrations/github/github.integration.route";
 import { UserProfileRoute } from "~/cmd/http/routes/user/session.user.route";
 import { HttpServer, type IHttpServer } from "~/cmd/http/server";
 import type { IHttpMiddleware } from "~/cmd/http/types";
@@ -26,10 +29,19 @@ container
 container
   .bind<IHttpRoute>(HTTP_SYMBOL.Route.User.Authentication)
   .to(UserProfileRoute);
+container
+  .bind<IHttpRoute>(HTTP_SYMBOL.Route.Integrations.Github.Root)
+  .to(GithubIntegrationRoute);
+container
+  .bind<IHttpRoute>(HTTP_SYMBOL.Route.Integrations.Github.Callback)
+  .to(GithubIntegrationCallbackRoute);
 
 // routers
 container.bind<IHttpRouter>(HTTP_SYMBOL.Router.Bootstrap).to(BootstrapRouter);
 container.bind<IHttpRouter>(HTTP_SYMBOL.Router.User).to(UserRouter);
+container
+  .bind<IHttpRouter>(HTTP_SYMBOL.Router.Integrations)
+  .to(IntegrationsRouter);
 
 // middlewares
 container
