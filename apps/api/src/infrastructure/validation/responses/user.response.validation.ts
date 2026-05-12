@@ -23,7 +23,6 @@ export const zUserSesssionResponseMinimal = z.object({
       slug: z.string(),
       createdAt: z.date(),
       logo: z.url().nullable(),
-      metadata: z.record(z.string(), z.string()),
     })
     .nullable(),
   organizations: z.array(
@@ -33,7 +32,6 @@ export const zUserSesssionResponseMinimal = z.object({
       slug: z.string(),
       createdAt: z.date(),
       logo: z.url().nullable(),
-      metadata: z.record(z.string(), z.string()),
     }),
   ),
 });

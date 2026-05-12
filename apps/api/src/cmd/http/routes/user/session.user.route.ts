@@ -1,13 +1,11 @@
 import { inject, injectable } from "inversify";
-import {
-  authentication,
-  type IAuthentication,
-} from "~/infrastructure/config/better-auth.config";
+import type { IAuthentication } from "~/infrastructure/config/better-auth.config";
 import { INFRASTRUCTURE_SYMBOL } from "~/infrastructure/ioc/symbols.ioc";
 import type { ILogger } from "~/infrastructure/logger/logger.infrastructure";
+import type { IPostgresPersistence } from "~/infrastructure/persistence/postgres.persistence";
 import { zHttpGetUserSessionNullable } from "~/infrastructure/validation/http/user.http.validation";
 import type { IzUserSesssionResponseMinimal } from "~/infrastructure/validation/responses/user.response.validation";
-import { HttpMethod } from "~/shared/types/http.types";
+import { HttpError, HttpMethod } from "~/shared/types/http.types";
 import { ResponseSchema } from "~/shared/utils/response.utils";
 import { HttpRoute, type RequestContext, RequestSchema } from "../../route";
 
@@ -18,7 +16,11 @@ const zGetUserSessionResponseSchema = ResponseSchema({
 
 @injectable()
 export class UserProfileRoute extends HttpRoute {
-  constructor(@inject(INFRASTRUCTURE_SYMBOL.Logger) logger: ILogger) {
+  constructor(
+    @inject(INFRASTRUCTURE_SYMBOL.Logger) logger: ILogger,
+    @inject(INFRASTRUCTURE_SYMBOL.Postgres)
+    private readonly postgres: IPostgresPersistence,
+  ) {
     super(logger);
   }
 
@@ -36,7 +38,6 @@ export class UserProfileRoute extends HttpRoute {
   private async getUserSession({
     authentication: authenticationCtx,
     response,
-    headers,
   }: RequestContext<
     typeof zGetUserSessionRequestSchema,
     typeof zGetUserSessionResponseSchema,
@@ -46,33 +47,45 @@ export class UserProfileRoute extends HttpRoute {
       return response.success({ session: null });
     }
 
-    let activeOrganization: IAuthentication["ActiveOrganization"] | null = null;
+    const memberships = await this.postgres.client.query.memberSchema.findMany({
+      where: ({ userId }, { eq }) =>
+        eq(userId, authenticationCtx.session.userId),
+      with: { organization: { columns: { metadata: false } } },
+    });
+
+    let activeOrganization: IAuthentication["Organization"] | null = null;
 
     if (authenticationCtx.session.activeOrganizationId) {
-      activeOrganization = await authentication.api.getFullOrganization({
-        query: {
-          organizationId: authenticationCtx.session.activeOrganizationId,
-        },
-        headers,
-      });
+      activeOrganization =
+        memberships.find(
+          (membership) =>
+            membership.organization.id ===
+            authenticationCtx.session.activeOrganizationId,
+        )?.organization ?? null;
     }
 
-    const organizations = await authentication.api.listOrganizations({
-      headers,
-    });
+    if (authenticationCtx.session.activeOrganizationId && !activeOrganization) {
+      return response.unsuccessful({
+        code: HttpError.CONFLICT,
+        message: "Active organization is not available for this session",
+        detail: {
+          organizationId: authenticationCtx.session.activeOrganizationId,
+        },
+      });
+    }
 
     return response.success({
       session: this.serializeSession(
         authenticationCtx.user,
         activeOrganization,
-        organizations,
+        memberships.map((membership) => membership.organization),
       ),
     });
   }
 
   private serializeSession(
     user: IAuthentication["Session"]["user"],
-    activeOrganization: IAuthentication["ActiveOrganization"] | null,
+    activeOrganization: IAuthentication["Organization"] | null,
     organizations: IAuthentication["Organization"][],
   ): IzUserSesssionResponseMinimal {
     return {
@@ -87,7 +100,6 @@ export class UserProfileRoute extends HttpRoute {
         name: activeOrganization.name,
         slug: activeOrganization.slug,
         logo: activeOrganization.logo ?? null,
-        metadata: activeOrganization.metadata ?? {},
         createdAt: activeOrganization.createdAt,
       },
       organizations: organizations.map((organization) => ({
@@ -95,7 +107,6 @@ export class UserProfileRoute extends HttpRoute {
         name: organization.name,
         slug: organization.slug,
         logo: organization.logo ?? null,
-        metadata: organization.metadata ?? {},
         createdAt: organization.createdAt,
       })),
     };

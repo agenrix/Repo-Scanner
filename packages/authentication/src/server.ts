@@ -64,6 +64,9 @@ export const createAuthenticationServerClient = <
     plugins: authPlugins,
     trustedOrigins,
     secret,
+    experimental: {
+      joins: true,
+    },
     advanced: {
       database: {
         generateId: false,
