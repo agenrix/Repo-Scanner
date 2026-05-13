@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="./assets/agenrixLogo.png" alt="agenRIX Logo" width="200"/>
-</p>
 # Agenrix: Unified Agent Registry & Audit System
 
 **Agenrix** is a premium full-stack enterprise solution designed to manage, monitor, and audit autonomous agents across repositories. It provides a centralized **Unified Registry** to track agent identities, control access rights, and log high-frequency telemetry for security compliance.
