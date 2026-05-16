@@ -14,9 +14,13 @@ export class BootstrapRouter implements IHttpRouter {
 
     @inject(HTTP_SYMBOL.Router.Integrations)
     private readonly integrationsRouter: IHttpRouter,
+
+    @inject(HTTP_SYMBOL.Router.Authentication)
+    private readonly authenticationRouter: IHttpRouter,
   ) {}
   async init(path: string, app: IHttpApp): Promise<void> {
     await this.userRouter.init(`${path}/user`, app);
     await this.integrationsRouter.init(`${path}/integrations`, app);
+    await this.authenticationRouter.init(`${path}/authentication`, app);
   }
 }

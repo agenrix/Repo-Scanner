@@ -35,6 +35,12 @@ container
 container
   .bind<IHttpRoute>(HTTP_SYMBOL.Route.Integrations.Github.Callback)
   .to(GithubIntegrationCallbackRoute);
+container
+  .bind<IHttpRoute>(HTTP_SYMBOL.Route.Authentication.Root)
+  .to(AuthenticationRootRoute);
+
+import { AuthenticationRouter } from "~/cmd/http/routers/authentication.router";
+import { AuthenticationRootRoute } from "~/cmd/http/routes/authentication/auth.route";
 
 // routers
 container.bind<IHttpRouter>(HTTP_SYMBOL.Router.Bootstrap).to(BootstrapRouter);
@@ -42,6 +48,9 @@ container.bind<IHttpRouter>(HTTP_SYMBOL.Router.User).to(UserRouter);
 container
   .bind<IHttpRouter>(HTTP_SYMBOL.Router.Integrations)
   .to(IntegrationsRouter);
+container
+  .bind<IHttpRouter>(HTTP_SYMBOL.Router.Authentication)
+  .to(AuthenticationRouter);
 
 // middlewares
 container

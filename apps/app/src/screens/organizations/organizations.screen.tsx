@@ -7,7 +7,6 @@ import { SubmitButton } from "~/components/common/submit-button.component";
 import * as AvatarComponent from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { getSession } from "~/hooks/authentication/get-session.hook";
-import { authClient } from "~/lib/auth/client";
 
 export default function OrganizationsScreen() {
   const [launchingOrganizationId, setLaunchingOrganizationId] = React.useState<
@@ -31,29 +30,28 @@ export default function OrganizationsScreen() {
   const firstName = session.user.name.split(" ").at(0) ?? session.user.name;
 
   async function handleOrganizationLaunch(organizationId: string) {
-    await authClient.organization.setActive({
-      organizationId,
-      fetchOptions: {
-        onRequest: () => {
-          setLaunchingOrganizationId(organizationId);
-        },
-        onError: ({ error }) => {
-          toast.error("Failed to launch organization", {
-            richColors: true,
-            description: error.message,
-          });
-          setLaunchingOrganizationId(null);
-        },
-        onSuccess: async () => {
-          await queryClient.invalidateQueries({
-            queryKey: ["user", "session"],
-          });
+    // TODO: REMOVE LATER - Replaced by custom Drizzle Auth
+    // The endpoint /v1/user/session handles the active organization logic.
+    // For now, we will just simulate a success response since setting active org
+    // requires a new custom DB endpoint.
+    setLaunchingOrganizationId(organizationId);
+    try {
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-          await navigate({ to: "/" });
-          setLaunchingOrganizationId(null);
-        },
-      },
-    });
+      await queryClient.invalidateQueries({
+        queryKey: ["user", "session"],
+      });
+
+      await navigate({ to: "/" });
+    } catch (error) {
+      toast.error("Failed to launch organization", {
+        richColors: true,
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setLaunchingOrganizationId(null);
+    }
   }
 
   return (

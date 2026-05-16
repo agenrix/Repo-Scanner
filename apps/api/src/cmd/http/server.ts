@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { pinoLogger } from "hono-pino";
 import { inject, injectable } from "inversify";
-import { authentication } from "~/infrastructure/config/better-auth.config";
 import { env } from "~/infrastructure/config/env.config";
 import {
   HTTP_SYMBOL,
@@ -45,11 +44,12 @@ export class HttpServer implements IHttpServer {
 
     await this.setupMiddlewares(app);
 
-    app.on(
-      ["GET", "POST"],
-      "/v1/authentication/*",
-      async (c) => await authentication.handler(c.req.raw),
-    );
+    // TODO: REMOVE LATER - Replaced by custom Drizzle Auth in routes/authentication
+    // app.on(
+    //   ["GET", "POST"],
+    //   "/v1/authentication/*",
+    //   async (c) => await authentication.handler(c.req.raw),
+    // );
 
     await this.router.init("/v1", app);
     await this.start(app);

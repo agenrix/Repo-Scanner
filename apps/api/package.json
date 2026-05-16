@@ -20,6 +20,7 @@
     "@agenrix/authentication": "workspace:*",
     "@agenrix/logger": "workspace:*",
     "@agenrix/pg": "workspace:*",
+    "drizzle-orm": "^0.45.2",
     "hono": "^4.12.18",
     "hono-pino": "^0.10.3",
     "inversify": "^8.1.0",

@@ -1,9 +1,8 @@
 import { SignOutIcon, UserIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { toast } from "sonner";
-import { authClient } from "~/lib/auth/client";
+
 import type { IUser } from "~/types/user.types";
 import * as AvatarComponent from "../ui/avatar";
 import * as DropdownMenuComponent from "../ui/dropdown-menu";
@@ -13,30 +12,32 @@ interface UserAvatarProps {
 }
 
 export default function UserAvatar({ user }: UserAvatarProps) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toastId = React.useRef<string | number>(undefined);
 
   async function handleSignOut() {
-    await authClient.signOut({
-      fetchOptions: {
-        onRequest: () => {
-          toastId.current = toast.loading("Signing out...");
+    toastId.current = toast.loading("Signing out...");
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/v1/authentication/sign-out`,
+        {
+          method: "POST",
+          credentials: "include",
         },
-        onError: ({ error }) => {
-          toast.error("Failed to sign out", {
-            richColors: true,
-            description: error?.message ?? "An unknown error occurred",
-            id: toastId.current,
-          });
-        },
-        onSuccess: async () => {
-          queryClient.invalidateQueries({ queryKey: ["user", "session"] });
+      );
+      if (!res.ok) throw new Error("Failed to sign out");
 
-          await navigate({ to: "/login", replace: true });
-        },
-      },
-    });
+      toast.success("Signed out successfully", { id: toastId.current });
+      queryClient.clear();
+      window.location.href = "/login";
+    } catch (error) {
+      toast.error("Failed to sign out", {
+        richColors: true,
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
+        id: toastId.current,
+      });
+    }
   }
 
   return (
