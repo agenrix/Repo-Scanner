@@ -22,6 +22,20 @@
       "when": 1778351417683,
       "tag": "0002_damp_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778935614789,
+      "tag": "0003_many_sersi",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778935848435,
+      "tag": "0004_rainy_captain_midlands",
+      "breakpoints": true
     }
   ]
 }

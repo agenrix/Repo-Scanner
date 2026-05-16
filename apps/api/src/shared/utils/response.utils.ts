@@ -40,6 +40,7 @@ export interface IResponseUtils<TResponseSchema extends AnyResponseSchema> {
   unauthorized(message?: string): Response;
   unsuccessful(args: IUnsuccessfulResponse): Response;
   somethingWentWrong(message?: string): Response;
+  redirect(url: URL): Response;
 }
 
 interface IUnsuccessfulResponse {
@@ -94,5 +95,9 @@ export class ResponseUtils<TResponseSchema extends AnyResponseSchema>
     } as z.input<TResponseSchema>);
 
     return this.ctx.json(response, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  redirect(url: URL): Response {
+    return this.ctx.redirect(url);
   }
 }

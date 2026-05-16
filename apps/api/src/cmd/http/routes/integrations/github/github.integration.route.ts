@@ -5,15 +5,19 @@ import {
   type RequestContext,
   RequestSchema,
 } from "~/cmd/http/route";
+import { env } from "~/infrastructure/config/env.config";
 import { INFRASTRUCTURE_SYMBOL } from "~/infrastructure/ioc/symbols.ioc";
 import type { ILogger } from "~/infrastructure/logger/logger.infrastructure";
 import { HttpMethod } from "~/shared/types/http.types";
 import { ResponseSchema } from "~/shared/utils/response.utils";
 
 const zConnectRequestSchema = RequestSchema({
+  body: z.object({ redirectUri: z.url() }),
   params: z.object({ organizationId: z.string() }),
 });
-const zConnectResponseSchema = ResponseSchema({ data: z.null() });
+const zConnectResponseSchema = ResponseSchema({
+  data: z.object({ url: z.url() }),
+});
 
 const zDisconnectRequestSchema = RequestSchema({
   params: z.object({ organizationId: z.string() }),
@@ -47,6 +51,7 @@ export class GithubIntegrationRoute extends HttpRoute {
   }
 
   private async connect({
+    authentication,
     data,
     logger,
     response,
@@ -55,13 +60,28 @@ export class GithubIntegrationRoute extends HttpRoute {
     typeof zConnectResponseSchema,
     true
   >) {
+    const state = Buffer.from(
+      JSON.stringify({
+        redirectUri: data.body.redirectUri,
+        organizationId: data.params.organizationId,
+        userId: authentication.session.userId,
+      }),
+    ).toString("base64url");
+
     logger.info(
       { organizationId: data.params.organizationId },
       `Received connect request for ${data.params.organizationId}`,
     );
 
-    return response.success(null);
+    const appInstallationUrl = new URL(
+      env.integrations.github.appInstallationUrl,
+    );
+
+    appInstallationUrl.searchParams.set("state", state);
+
+    return response.success({ url: appInstallationUrl.toString() });
   }
+
   private async disconnect({
     data,
     logger,

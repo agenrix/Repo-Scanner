@@ -44,6 +44,12 @@ const zEnvSchemaOAuth = z.object({
   }),
 });
 
+const zEnvSchemaGithubIntegration = z.object({ appInstallationUrl: z.url() });
+
+const zEnvSchemaIntegrations = z.object({
+  github: zEnvSchemaGithubIntegration,
+});
+
 export const zEnvSchema = z.object({
   name: z.string().default("@agenrix/api"),
   nodeEnv: z.enum(NodeEnv),
@@ -53,6 +59,7 @@ export const zEnvSchema = z.object({
   persistence: zEnvSchemaPersistence,
   authentication: zEnvSchemaAuthentication,
   oauth: zEnvSchemaOAuth,
+  integrations: zEnvSchemaIntegrations,
 });
 
 export type IEnvSchema = z.infer<typeof zEnvSchema>;

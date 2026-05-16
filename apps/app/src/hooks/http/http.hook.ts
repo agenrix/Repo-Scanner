@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "~/lib/http/api.http";
 
 type ApiResponse<TData> =
@@ -79,6 +79,18 @@ interface IGetHttpOptions {
   pathParams?: Record<string, string | number>;
 }
 
+interface IPostHttpOptions {
+  path: string;
+  headers?: HeadersInit;
+  pathParams?: Record<string, string | number>;
+}
+
+interface IDeleteHttpOptions {
+  path: string;
+  headers?: HeadersInit;
+  pathParams?: Record<string, string | number>;
+}
+
 export function getHttpQueryKey(opts: IGetHttpOptions) {
   const url = replacePathParams(opts.path, opts.pathParams);
   const pathParamKeys = Object.entries(opts.pathParams ?? {})
@@ -112,4 +124,55 @@ export function getHttpQueryOptions<TData>(opts: IGetHttpOptions) {
 
 export const useGetHttp = <TData>(opts: IGetHttpOptions) => {
   return useQuery(getHttpQueryOptions<TData>(opts));
+};
+
+export async function postHttpHandler<TData, TVariables = unknown>(
+  opts: IPostHttpOptions,
+  variables: TVariables,
+) {
+  const url = replacePathParams(opts.path, opts.pathParams);
+  const response = await api.post(url, {
+    headers: opts.headers,
+    ...(variables === undefined ? {} : { json: variables }),
+    throwHttpErrors: false,
+  });
+  const responseJson = await parseApiResponse<TData>(response);
+
+  if (!responseJson.success) {
+    throw new ApiResponseError(responseJson.error, response.status);
+  }
+
+  return responseJson.data;
+}
+
+export const usePostHttp = <TData, TVariables = unknown>(
+  opts: IPostHttpOptions,
+) => {
+  return useMutation({
+    mutationKey: getHttpQueryKey(opts),
+    mutationFn: (variables: TVariables) =>
+      postHttpHandler<TData, TVariables>(opts, variables),
+  });
+};
+
+export async function deleteHttpHandler<TData>(opts: IDeleteHttpOptions) {
+  const url = replacePathParams(opts.path, opts.pathParams);
+  const response = await api.delete(url, {
+    headers: opts.headers,
+    throwHttpErrors: false,
+  });
+  const responseJson = await parseApiResponse<TData>(response);
+
+  if (!responseJson.success) {
+    throw new ApiResponseError(responseJson.error, response.status);
+  }
+
+  return responseJson.data;
+}
+
+export const useDeleteHttp = <TData>(opts: IDeleteHttpOptions) => {
+  return useMutation({
+    mutationKey: getHttpQueryKey(opts),
+    mutationFn: () => deleteHttpHandler<TData>(opts),
+  });
 };

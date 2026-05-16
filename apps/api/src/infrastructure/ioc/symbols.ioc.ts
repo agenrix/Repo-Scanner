@@ -10,6 +10,7 @@ export const HTTP_SYMBOL = {
     },
 
     Integrations: {
+      Root: Symbol.for("IntegrationsRoute"),
       Github: {
         Root: Symbol.for("GithubIntegrationRoute"),
         Callback: Symbol.for("GithubIntegrationCallbackRoute"),

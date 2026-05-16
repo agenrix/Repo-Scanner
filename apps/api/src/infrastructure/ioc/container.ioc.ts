@@ -7,6 +7,7 @@ import { IntegrationsRouter } from "~/cmd/http/routers/integrations.router";
 import { UserRouter } from "~/cmd/http/routers/user.router";
 import { GithubIntegrationCallbackRoute } from "~/cmd/http/routes/integrations/github/callback.github.integration.route";
 import { GithubIntegrationRoute } from "~/cmd/http/routes/integrations/github/github.integration.route";
+import { IntegrationsRoute } from "~/cmd/http/routes/integrations/integrations.route";
 import { UserProfileRoute } from "~/cmd/http/routes/user/session.user.route";
 import { HttpServer, type IHttpServer } from "~/cmd/http/server";
 import type { IHttpMiddleware } from "~/cmd/http/types";
@@ -29,6 +30,9 @@ container
 container
   .bind<IHttpRoute>(HTTP_SYMBOL.Route.User.Authentication)
   .to(UserProfileRoute);
+container
+  .bind<IHttpRoute>(HTTP_SYMBOL.Route.Integrations.Root)
+  .to(IntegrationsRoute);
 container
   .bind<IHttpRoute>(HTTP_SYMBOL.Route.Integrations.Github.Root)
   .to(GithubIntegrationRoute);

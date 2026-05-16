@@ -1,12 +1,12 @@
 import z from "zod";
 import {
-  zUserResponseMinimal,
-  zUserSesssionResponseMinimal as zUserSessionResponseMinimal,
+  zUserResponse,
+  zUserSesssionResponse as zUserSessionResponseMinimal,
 } from "../responses/user.response.validation";
 
-export const zHttpGetUserMinimal = z.object({ user: zUserResponseMinimal });
+export const zHttpGetUserMinimal = z.object({ user: zUserResponse });
 export const zHttpGetUserNullable = z.object({
-  user: zUserResponseMinimal.nullable(),
+  user: zUserResponse.nullable(),
 });
 
 export const zHttpGetUserSessionMinimal = z.object({

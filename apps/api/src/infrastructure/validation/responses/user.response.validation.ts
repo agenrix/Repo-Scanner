@@ -1,41 +1,21 @@
 import z from "zod";
+import { zOrganizationResponse } from "./organization.response.validation";
 
-export const zUserResponseMinimal = z.object({
+export const zUserResponse = z.object({
   id: z.string(),
   name: z.string(),
   email: z.email(),
   image: z.url().nullable(),
 });
 
-export type IzUserResponseMinimal = z.infer<typeof zUserResponseMinimal>;
+export type IzUserResponseMinimal = z.infer<typeof zUserResponse>;
 
-export const zUserSesssionResponseMinimal = z.object({
-  user: z.object({
-    id: z.string(),
-    name: z.string(),
-    email: z.email(),
-    image: z.url().nullable(),
-  }),
-  activeOrganization: z
-    .object({
-      id: z.string(),
-      name: z.string(),
-      slug: z.string(),
-      createdAt: z.date(),
-      logo: z.url().nullable(),
-    })
-    .nullable(),
-  organizations: z.array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      slug: z.string(),
-      createdAt: z.date(),
-      logo: z.url().nullable(),
-    }),
-  ),
+export const zUserSesssionResponse = z.object({
+  user: zUserResponse,
+  activeOrganization: zOrganizationResponse.nullable(),
+  organizations: z.array(zOrganizationResponse),
 });
 
 export type IzUserSesssionResponseMinimal = z.infer<
-  typeof zUserSesssionResponseMinimal
+  typeof zUserSesssionResponse
 >;

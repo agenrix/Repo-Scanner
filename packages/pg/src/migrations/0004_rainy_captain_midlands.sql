@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX "github_credentials_installation_id_idx" ON "github_credentials" USING btree ("installation_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "integrations_organization_id_app_name_idx" ON "integrations" USING btree ("organization_id","app_name");

@@ -29,6 +29,11 @@ export const env: IEnvSchema = validate(zEnvSchema, {
       clientSecret: process.env.GITHUB_OAUTH_CLIENT_SECRET as string,
     },
   },
+  integrations: {
+    github: {
+      appInstallationUrl: process.env.GITHUB_APP_INSTALLATION_URL as string,
+    },
+  },
   persistence: {
     pg: {
       url: process.env.POSTGRES_URL as string,

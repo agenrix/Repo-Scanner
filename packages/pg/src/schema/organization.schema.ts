@@ -24,6 +24,9 @@ export const organizationSchema = pgTable(
   (table) => [uniqueIndex("organization_slug_uidx").on(table.slug)],
 );
 
+export type ISelectOrganization = typeof organizationSchema.$inferSelect;
+export type IInsertOrganization = typeof organizationSchema.$inferInsert;
+
 export const organizationSchemaRelations = relations(
   organizationSchema,
   ({ many }) => ({

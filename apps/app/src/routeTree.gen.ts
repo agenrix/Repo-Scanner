@@ -17,6 +17,7 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedOrganizationsIndexRouteImport } from './routes/_protected/organizations/index'
 import { Route as ProtectedHomeIndexRouteImport } from './routes/_protected/_home/index'
 import { Route as ProtectedOrganizationsNewRouteImport } from './routes/_protected/organizations/new'
+import { Route as ProtectedHomeIntegrationsRouteImport } from './routes/_protected/_home/integrations'
 
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
@@ -57,17 +58,25 @@ const ProtectedOrganizationsNewRoute =
     path: '/new',
     getParentRoute: () => ProtectedOrganizationsRoute,
   } as any)
+const ProtectedHomeIntegrationsRoute =
+  ProtectedHomeIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => ProtectedHomeRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ProtectedHomeIndexRoute
   '/login': typeof AuthLoginRoute
   '/organizations': typeof ProtectedOrganizationsRouteWithChildren
+  '/integrations': typeof ProtectedHomeIntegrationsRoute
   '/organizations/new': typeof ProtectedOrganizationsNewRoute
   '/organizations/': typeof ProtectedOrganizationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof ProtectedHomeIndexRoute
   '/login': typeof AuthLoginRoute
+  '/integrations': typeof ProtectedHomeIntegrationsRoute
   '/organizations/new': typeof ProtectedOrganizationsNewRoute
   '/organizations': typeof ProtectedOrganizationsIndexRoute
 }
@@ -78,6 +87,7 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_protected/_home': typeof ProtectedHomeRouteWithChildren
   '/_protected/organizations': typeof ProtectedOrganizationsRouteWithChildren
+  '/_protected/_home/integrations': typeof ProtectedHomeIntegrationsRoute
   '/_protected/organizations/new': typeof ProtectedOrganizationsNewRoute
   '/_protected/_home/': typeof ProtectedHomeIndexRoute
   '/_protected/organizations/': typeof ProtectedOrganizationsIndexRoute
@@ -88,10 +98,11 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/organizations'
+    | '/integrations'
     | '/organizations/new'
     | '/organizations/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/organizations/new' | '/organizations'
+  to: '/' | '/login' | '/integrations' | '/organizations/new' | '/organizations'
   id:
     | '__root__'
     | '/_auth'
@@ -99,6 +110,7 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_protected/_home'
     | '/_protected/organizations'
+    | '/_protected/_home/integrations'
     | '/_protected/organizations/new'
     | '/_protected/_home/'
     | '/_protected/organizations/'
@@ -167,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedOrganizationsNewRouteImport
       parentRoute: typeof ProtectedOrganizationsRoute
     }
+    '/_protected/_home/integrations': {
+      id: '/_protected/_home/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof ProtectedHomeIntegrationsRouteImport
+      parentRoute: typeof ProtectedHomeRoute
+    }
   }
 }
 
@@ -181,10 +200,12 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface ProtectedHomeRouteChildren {
+  ProtectedHomeIntegrationsRoute: typeof ProtectedHomeIntegrationsRoute
   ProtectedHomeIndexRoute: typeof ProtectedHomeIndexRoute
 }
 
 const ProtectedHomeRouteChildren: ProtectedHomeRouteChildren = {
+  ProtectedHomeIntegrationsRoute: ProtectedHomeIntegrationsRoute,
   ProtectedHomeIndexRoute: ProtectedHomeIndexRoute,
 }
 

@@ -34,7 +34,7 @@ const platformLinks = [
   },
   {
     label: "Integrations",
-    to: "/",
+    to: "/integrations",
     icon: Blockchain01Icon,
   },
 ] as const;

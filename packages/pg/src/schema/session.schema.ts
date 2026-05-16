@@ -24,6 +24,9 @@ export const sessionSchema = pgTable(
   (table) => [index("session_userId_idx").on(table.userId)],
 );
 
+export type ISelectSession = typeof sessionSchema.$inferSelect;
+export type IInsertSession = typeof sessionSchema.$inferInsert;
+
 export const sessionSchemaRelations = relations(sessionSchema, ({ one }) => ({
   user: one(userSchema, {
     fields: [sessionSchema.userId],
