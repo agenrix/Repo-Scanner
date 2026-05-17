@@ -11,6 +11,7 @@ import { generalLogger } from "~/infrastructure/logger/logger.infrastructure";
 import { zGithubRepository } from "~/infrastructure/validation/atoms/github.atom";
 
 type IAnalyzeRepositoryEventParams = {
+  organizationId: string;
   repository: string;
 };
 
@@ -308,6 +309,7 @@ export const repositoryAnalysisWorkflow = inngestClient.createFunction(
       const webhookResult = await step.run("send-to-webhook", async () => {
         const backendPayload = {
           repo: {
+            organization_id: event.data.organizationId,
             repo_id: repositoryMetadata.repoId,
             repo_name: repositoryMetadata.repoName,
             repo_link: repository,

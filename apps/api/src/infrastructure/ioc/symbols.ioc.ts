@@ -16,6 +16,10 @@ export const HTTP_SYMBOL = {
         Callback: Symbol.for("GithubIntegrationCallbackRoute"),
       },
     },
+
+    RepoScans: {
+      Root: Symbol.for("RepoScansRoute"),
+    },
   },
 
   Router: {

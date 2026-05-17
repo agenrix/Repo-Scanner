@@ -1,8 +1,9 @@
 import {
   Blockchain01Icon,
+  ChartLineData01Icon,
   Home03Icon,
   LifebuoyIcon,
-  Robot01Icon,
+  Note01Icon,
   Settings02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -26,16 +27,25 @@ const platformLinks = [
     label: "Home",
     to: "/",
     icon: Home03Icon,
+    disabled: false,
   },
   {
-    label: "Agents",
+    label: "Scans",
     to: "/",
-    icon: Robot01Icon,
+    icon: ChartLineData01Icon,
+    disabled: true,
+  },
+  {
+    label: "Logs",
+    to: "/",
+    icon: Note01Icon,
+    disabled: true,
   },
   {
     label: "Integrations",
     to: "/integrations",
     icon: Blockchain01Icon,
+    disabled: true,
   },
 ] as const;
 
@@ -98,6 +108,7 @@ export default function HomeSidebar({
                 <SidebarComponent.SidebarMenuButton
                   className="rounded font-medium"
                   asChild
+                  disabled={item.disabled}
                 >
                   <Link to={item.to}>
                     <HugeiconsIcon
