@@ -1,0 +1,39 @@
+import { relations } from "drizzle-orm";
+import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { userSchema } from "./user.schema";
+
+export const accountSchema = pgTable(
+  "account",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => userSchema.id, { onDelete: "cascade" }),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at"),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+    scope: text("scope"),
+    password: text("password"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index("account_userId_idx").on(table.userId)],
+);
+
+export type ISelectAccount = typeof accountSchema.$inferSelect;
+export type IInsertAccount = typeof accountSchema.$inferInsert;
+
+export const accountSchemaRelations = relations(accountSchema, ({ one }) => ({
+  user: one(userSchema, {
+    fields: [accountSchema.userId],
+    references: [userSchema.id],
+  }),
+}));

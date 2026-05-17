@@ -1,0 +1,28 @@
+{
+  "name": "@agenrix/pg",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "generate": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "nuke": "drizzle-kit generate && drizzle-kit migrate",
+    "studio": "drizzle-kit studio"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.10"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./orm": "./src/orm.ts",
+    "./schema": "./src/schema/index.ts",
+    "./drizzle.config": "./drizzle.config.ts"
+  }
+}
