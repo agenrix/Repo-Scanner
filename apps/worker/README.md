@@ -59,12 +59,12 @@ cp .env.example .env
 
 | Variable               | Description                              | Example                   | Default                 |
 | ---------------------- | ---------------------------------------- | ------------------------- | ----------------------- |
-| `PORT`                 | Worker API port                          | `3000`                    | `3000`                  |
+| `PORT`                 | Worker API port                          | `3002`                    | `3002`                  |
 | `LOG_LEVEL`            | Logging level                            | `DEBUG`, `INFO`, `WARN`   | `INFO`                  |
 | `INNGEST_DEV`          | Enable local Inngest dev server          | `1` or `0`                | `1`                     |
 | `INNGEST_API_BASE_URL` | Inngest API base URL (production)        | `https://api.inngest.com` | Local dev server        |
 | `INNGEST_SIGNING_KEY`  | Inngest webhook signing key (production) | `signsk_...`              | Optional (local dev)    |
-| `BACKEND_API_URL`      | Backend API for result submission        | `http://localhost:8000`   | `http://localhost:8000` |
+| `BACKEND_WEBHOOK_BASE_URL` | Backend webhook URL for result submission | `http://127.0.0.1:3001/v1` | `http://127.0.0.1:3001/v1` |
 
 ### Step 2: Install Dependencies
 
@@ -109,9 +109,7 @@ bun run dev
 **Expected output:**
 
 ```
-[pid 1234] using bun run dev
-[hono] Server is running on http://localhost:3000
-Worker API ready at http://localhost:3000/v1
+Server listening on http://0.0.0.0:3002
 ```
 
 **Build for production:**
@@ -142,6 +140,7 @@ Dispatch a repository analysis job to the background queue.
 
 ```json
 {
+    "organizationId": "018e4c71-3f9a-7000-9b59-a1234567890a",
     "repository": "https://github.com/advtszn/altar"
 }
 ```
@@ -149,9 +148,9 @@ Dispatch a repository analysis job to the background queue.
 **Request:**
 
 ```bash
-curl -X POST http://localhost:3000/v1/worker \
+curl -X POST http://localhost:3002/v1/worker \
   -H "Content-Type: application/json" \
-  -d '{"repository":"https://github.com/advtszn/altar"}'
+  -d '{"organizationId":"018e4c71-3f9a-7000-9b59-a1234567890a","repository":"https://github.com/advtszn/altar"}'
 ```
 
 **Success Response (200 OK):**
@@ -188,104 +187,6 @@ curl -X POST http://localhost:3000/v1/worker \
 - `Missing required field`: Repository URL was not provided
 - `Invalid input`: Repository parameter is malformed
 
----
-
-### Job Status Polling
-
-#### `GET /v1/worker/events/:eventId`
-
-Poll the status of a previously dispatched analysis job. Requires the `INNGEST_SIGNING_KEY` to be configured.
-
-**Path Parameters:**
-
-- `eventId` (string): The event ID returned from job submission
-
-**Request:**
-
-```bash
-curl http://localhost:3000/v1/worker/events/01KQ43JX0DEA7P9ZQBKMC6N5J8
-```
-
-**Success Response (200 OK) - Running:**
-
-```json
-{
-    "success": true,
-    "data": {
-        "eventId": "01KQ43JX0DEA7P9ZQBKMC6N5J8",
-        "event": {
-            "id": "01KQ43JX0DEA7P9ZQBKMC6N5J8",
-            "name": "agent/analyze-repository",
-            "data": {
-                "repository": "https://github.com/advtszn/altar"
-            }
-        },
-        "runId": "01KQ43K123ABCDEF456789XYZ",
-        "status": "running",
-        "run": {
-            "runId": "01KQ43K123ABCDEF456789XYZ",
-            "functionId": "repository-analysis",
-            "status": "running"
-        }
-    }
-}
-```
-
-**Success Response (200 OK) - Completed:**
-
-```json
-{
-    "success": true,
-    "data": {
-        "eventId": "01KQ43JX0DEA7P9ZQBKMC6N5J8",
-        "status": "completed",
-        "run": {
-            "runId": "01KQ43K123ABCDEF456789XYZ",
-            "status": "completed",
-            "output": {
-                "classification": "AGENT",
-                "confidence": "high",
-                "frameworks_detected": ["langchain"],
-                "reasoning": "Repository contains autonomous agent patterns..."
-            }
-        }
-    }
-}
-```
-
-**Status Values:**
-
-- `queued` — Job is waiting to be processed
-- `running` — Job is currently executing
-- `completed` — Job finished successfully
-- `failed` — Job encountered an error
-- `cancelled` — Job was cancelled
-
-**Configuration Error (503 Service Unavailable):**
-
-```json
-{
-    "success": false,
-    "error": {
-        "message": "INNGEST_SIGNING_KEY is not configured"
-    }
-}
-```
-
-This error indicates the signing key is missing for Inngest webhook validation. Set `INNGEST_SIGNING_KEY` in `.env`.
-
-**Event Not Found (404 Not Found):**
-
-```json
-{
-    "success": false,
-    "error": {
-        "message": "Event not found: 01KQ43JX0DEA7P9ZQBKMC6N5J8"
-    }
-}
-```
-
-This can occur if the event ID is invalid or the event has expired.
 
 ---
 
@@ -306,31 +207,13 @@ cd apps/worker
 bun run dev
 ```
 
-**Terminal 3: Test Job Submission and Polling**
+**Terminal 3: Test Job Submission**
 
 ```bash
-# 1. Submit a repository analysis job
-RESPONSE=$(curl -s -X POST http://localhost:3000/v1/worker \
+# Submit a repository analysis job
+curl -s -X POST http://localhost:3002/v1/worker \
   -H "Content-Type: application/json" \
-  -d '{"repository":"https://github.com/advtszn/altar"}')
-
-EVENT_ID=$(echo $RESPONSE | jq -r '.data.eventId[0]')
-echo "Job submitted with Event ID: $EVENT_ID"
-
-# 2. Poll job status (wait a few seconds first)
-sleep 5
-
-curl http://localhost:3000/v1/worker/events/$EVENT_ID | jq .
-
-# 3. Continue polling until status is 'completed' or 'failed'
-for i in {1..20}; do
-  STATUS=$(curl -s http://localhost:3000/v1/worker/events/$EVENT_ID | jq -r '.data.status')
-  echo "Attempt $i: Status = $STATUS"
-  if [ "$STATUS" = "completed" ] || [ "$STATUS" = "failed" ]; then
-    break
-  fi
-  sleep 2
-done
+  -d '{"organizationId":"018e4c71-3f9a-7000-9b59-a1234567890a","repository":"https://github.com/advtszn/altar"}' | jq .
 ```
 
 ### View Job Details in Inngest Dashboard
@@ -410,7 +293,7 @@ For production deployment:
     ```env
     GOOGLE_GENERATIVE_AI_API_KEY=AIzaSy...
     E2B_API_KEY=e2b_...
-    BACKEND_API_URL=https://api.agenrix.com
+    BACKEND_WEBHOOK_BASE_URL=https://api.agenrix.com/v1
     ```
 
 3. **Set logging level:**
