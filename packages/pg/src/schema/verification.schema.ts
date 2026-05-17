@@ -17,3 +17,6 @@ export const verificationSchema = pgTable(
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
+
+export type ISelectVerification = typeof verificationSchema.$inferSelect;
+export type IInsertVerification = typeof verificationSchema.$inferInsert;

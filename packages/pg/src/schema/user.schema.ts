@@ -20,6 +20,9 @@ export const userSchema = pgTable("user", {
     .notNull(),
 });
 
+export type ISelectUser = typeof userSchema.$inferSelect;
+export type IInsertUser = typeof userSchema.$inferInsert;
+
 export const userSchemaRelations = relations(userSchema, ({ many }) => ({
   sessions: many(sessionSchema),
   accounts: many(accountSchema),

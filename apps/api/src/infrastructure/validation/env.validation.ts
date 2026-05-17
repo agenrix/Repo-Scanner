@@ -37,11 +37,21 @@ const zEnvSchemaAuthentication = z.object({
   secret: z.string(),
 });
 
+const zEnvSchemaWorker = z.object({
+  baseUrl: z.url(),
+});
+
 const zEnvSchemaOAuth = z.object({
   github: z.object({
     clientId: z.string(),
     clientSecret: z.string(),
   }),
+});
+
+const zEnvSchemaGithubIntegration = z.object({ appInstallationUrl: z.url() });
+
+const zEnvSchemaIntegrations = z.object({
+  github: zEnvSchemaGithubIntegration,
 });
 
 export const zEnvSchema = z.object({
@@ -52,7 +62,9 @@ export const zEnvSchema = z.object({
   http: zEnvSchemaHttp,
   persistence: zEnvSchemaPersistence,
   authentication: zEnvSchemaAuthentication,
+  worker: zEnvSchemaWorker,
   oauth: zEnvSchemaOAuth,
+  integrations: zEnvSchemaIntegrations,
 });
 
 export type IEnvSchema = z.infer<typeof zEnvSchema>;

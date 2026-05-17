@@ -1,4 +1,7 @@
 export * from "./account.schema";
+export * from "./agent.schema";
+export * from "./github-credentials.schema";
+export * from "./integrations.schema";
 export * from "./invitation.schema";
 export * from "./member.schema";
 export * from "./organization.schema";

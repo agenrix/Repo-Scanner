@@ -28,6 +28,9 @@ export const accountSchema = pgTable(
   (table) => [index("account_userId_idx").on(table.userId)],
 );
 
+export type ISelectAccount = typeof accountSchema.$inferSelect;
+export type IInsertAccount = typeof accountSchema.$inferInsert;
+
 export const accountSchemaRelations = relations(accountSchema, ({ one }) => ({
   user: one(userSchema, {
     fields: [accountSchema.userId],

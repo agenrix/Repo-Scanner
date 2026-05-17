@@ -17,7 +17,6 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@agenrix/authentication": "workspace:*",
     "@agenrix/logger": "workspace:*",
     "@agenrix/pg": "workspace:*",
     "drizzle-orm": "^0.45.2",

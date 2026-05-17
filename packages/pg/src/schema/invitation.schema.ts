@@ -27,6 +27,9 @@ export const invitationSchema = pgTable(
   ],
 );
 
+export type ISelectInvitation = typeof invitationSchema.$inferSelect;
+export type IInsertInvitation = typeof invitationSchema.$inferInsert;
+
 export const invitationSchemaRelations = relations(
   invitationSchema,
   ({ one }) => ({

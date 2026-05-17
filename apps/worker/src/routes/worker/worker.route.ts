@@ -8,6 +8,7 @@ import { zGithubRepository } from "~/infrastructure/validation/atoms/github.atom
 const workerRoute = new Hono();
 
 const zAnalyzeRepositoryBody = z.object({
+  organizationId: z.uuid(),
   repository: zGithubRepository,
 });
 

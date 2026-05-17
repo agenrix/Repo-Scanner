@@ -24,6 +24,9 @@ export const memberSchema = pgTable(
   ],
 );
 
+export type ISelectMember = typeof memberSchema.$inferSelect;
+export type IInsertMember = typeof memberSchema.$inferInsert;
+
 export const memberSchemaRelations = relations(memberSchema, ({ one }) => ({
   organization: one(organizationSchema, {
     fields: [memberSchema.organizationId],
