@@ -25,6 +25,13 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
+    "noPropertyAccessFromIndexSignature": false,
+    "baseUrl": ".",
+    "paths": {
+      "@agenrix/pg": ["./packages/pg/src/index.ts"],
+      "@agenrix/pg/*": ["./packages/pg/*"],
+      "@agenrix/logger": ["./packages/logger/index.ts"],
+      "@agenrix/authentication/*": ["./packages/authentication/src/*"]
+    }
   }
 }

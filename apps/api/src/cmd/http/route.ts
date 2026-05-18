@@ -51,6 +51,7 @@ export type RequestContext<
   response: IResponseUtils<TResponseSchema>;
   logger: PinoLogger;
   headers: Headers;
+  ctx: IHttpContext;
 } & RouteAuthentication<TAuthenticated>;
 
 type RouteHandler<
@@ -176,6 +177,7 @@ export abstract class HttpRoute implements IHttpRoute {
             ? { authentication: ctx.var.authentication }
             : {}),
           headers: ctx.req.raw.headers,
+          ctx,
         } as RequestContext<TRequestSchema, TResponseSchema, TAuthenticated>;
 
         return await handler(requestContext);

@@ -4,10 +4,12 @@ import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { toast } from "sonner";
 import { SubmitButton } from "~/components/common/submit-button.component";
+import InviteTeammateForm from "~/components/forms/organization/invite-teammate.form.component";
 import * as AvatarComponent from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import * as SheetComponent from "~/components/ui/sheet";
 import { getSession } from "~/hooks/authentication/get-session.hook";
-import { authClient } from "~/lib/auth/client";
+import { userHttp } from "~/lib/http/user.http";
 
 export default function OrganizationsScreen() {
   const [launchingOrganizationId, setLaunchingOrganizationId] = React.useState<
@@ -31,29 +33,19 @@ export default function OrganizationsScreen() {
   const firstName = session.user.name.split(" ").at(0) ?? session.user.name;
 
   async function handleOrganizationLaunch(organizationId: string) {
-    await authClient.organization.setActive({
-      organizationId,
-      fetchOptions: {
-        onRequest: () => {
-          setLaunchingOrganizationId(organizationId);
-        },
-        onError: ({ error }) => {
-          toast.error("Failed to launch organization", {
-            richColors: true,
-            description: error.message,
-          });
-          setLaunchingOrganizationId(null);
-        },
-        onSuccess: async () => {
-          await queryClient.invalidateQueries({
-            queryKey: ["user", "session"],
-          });
-
-          await navigate({ to: "/" });
-          setLaunchingOrganizationId(null);
-        },
-      },
-    });
+    setLaunchingOrganizationId(organizationId);
+    try {
+      await userHttp.setActiveOrganization(organizationId);
+      await queryClient.invalidateQueries({ queryKey: ["user", "session"] });
+      await navigate({ to: "/" });
+    } catch (error) {
+      toast.error("Failed to launch organization", {
+        richColors: true,
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setLaunchingOrganizationId(null);
+    }
   }
 
   return (
@@ -100,14 +92,41 @@ export default function OrganizationsScreen() {
                       </p>
                     </div>
 
-                    <SubmitButton
-                      isSubmitting={isLaunching}
-                      variant={"outline"}
-                      className="px-4"
-                      onClick={() => handleOrganizationLaunch(organization.id)}
-                    >
-                      Launch
-                    </SubmitButton>
+                    <div className="flex items-center gap-2">
+                      <SheetComponent.Sheet>
+                        <SheetComponent.SheetTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            Invite
+                          </Button>
+                        </SheetComponent.SheetTrigger>
+                        <SheetComponent.SheetContent side="right">
+                          <SheetComponent.SheetHeader>
+                            <SheetComponent.SheetTitle>
+                              Invite Teammate
+                            </SheetComponent.SheetTitle>
+                            <SheetComponent.SheetDescription>
+                              Send an email invitation to collaborate.
+                            </SheetComponent.SheetDescription>
+                          </SheetComponent.SheetHeader>
+                          <div className="mt-6">
+                            <InviteTeammateForm
+                              organizationId={organization.id}
+                            />
+                          </div>
+                        </SheetComponent.SheetContent>
+                      </SheetComponent.Sheet>
+
+                      <SubmitButton
+                        isSubmitting={isLaunching}
+                        variant={"outline"}
+                        className="px-4"
+                        onClick={() =>
+                          handleOrganizationLaunch(organization.id)
+                        }
+                      >
+                        Launch
+                      </SubmitButton>
+                    </div>
                   </div>
                 );
               })}

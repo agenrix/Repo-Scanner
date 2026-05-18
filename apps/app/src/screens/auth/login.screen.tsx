@@ -3,7 +3,6 @@ import React from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { env } from "~/env";
-import { authClient } from "~/lib/auth/client";
 
 export default function AuthLoginScreen() {
   const [isSigningIn, setIsSigningIn] = React.useState(false);
@@ -12,14 +11,7 @@ export default function AuthLoginScreen() {
     setIsSigningIn(true);
 
     try {
-      const { error } = await authClient.signIn.social({
-        provider: "github",
-        callbackURL: `${env.VITE_BASE_URL}/organizations`,
-      });
-
-      if (error) {
-        throw new Error(error.message ?? "Something went wrong");
-      }
+      window.location.href = `${env.VITE_API_URL}/v1/authentication/sign-in/github`;
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Something went wrong",

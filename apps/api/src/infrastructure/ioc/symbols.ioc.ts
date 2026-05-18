@@ -9,6 +9,10 @@ export const HTTP_SYMBOL = {
       Authentication: Symbol.for("AuthenticationUserRoute"),
     },
 
+    Authentication: {
+      Root: Symbol.for("AuthenticationRootRoute"),
+    },
+
     Integrations: {
       Root: Symbol.for("IntegrationsRoute"),
       Github: {
@@ -20,12 +24,18 @@ export const HTTP_SYMBOL = {
     RepoScans: {
       Root: Symbol.for("RepoScansRoute"),
     },
+
+    Organization: {
+      Root: Symbol.for("OrganizationRoute"),
+    },
   },
 
   Router: {
     Bootstrap: Symbol.for("BootstrapRouter"),
     User: Symbol.for("UserRouter"),
     Integrations: Symbol.for("IntegrationsRouter"),
+    Authentication: Symbol.for("AuthenticationRouter"),
+    Organization: Symbol.for("OrganizationRouter"),
   },
 
   Middleware: {

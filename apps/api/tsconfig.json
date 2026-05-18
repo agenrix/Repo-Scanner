@@ -33,7 +33,11 @@
 
     // alias
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "@agenrix/pg": ["../../packages/pg/src/index.ts"],
+      "@agenrix/pg/*": ["../../packages/pg/*"],
+      "@agenrix/logger": ["../../packages/logger/index.ts"],
+      "@agenrix/authentication/*": ["../../packages/authentication/src/*"]
     }
   }
 }

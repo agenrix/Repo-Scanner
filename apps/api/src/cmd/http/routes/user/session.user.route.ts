@@ -1,5 +1,11 @@
+import { and, eq } from "@agenrix/pg/orm";
+import type { ISelectOrganization, ISelectUser } from "@agenrix/pg/schema";
+import { sessionSchema } from "@agenrix/pg/schema";
 import { inject, injectable } from "inversify";
-import type { IAuthentication } from "~/infrastructure/config/better-auth.config";
+
+type IActiveOrganization = Omit<ISelectOrganization, "metadata">;
+
+import z from "zod";
 import { INFRASTRUCTURE_SYMBOL } from "~/infrastructure/ioc/symbols.ioc";
 import type { ILogger } from "~/infrastructure/logger/logger.infrastructure";
 import type { IPostgresPersistence } from "~/infrastructure/persistence/postgres.persistence";
@@ -12,6 +18,13 @@ import { HttpRoute, type RequestContext, RequestSchema } from "../../route";
 const zGetUserSessionRequestSchema = RequestSchema({});
 const zGetUserSessionResponseSchema = ResponseSchema({
   data: zHttpGetUserSessionNullable,
+});
+
+const zSetActiveOrganizationRequestSchema = RequestSchema({
+  body: z.object({ organizationId: z.string().uuid() }),
+});
+const zSetActiveOrganizationResponseSchema = ResponseSchema({
+  data: z.object({ success: z.literal(true) }),
 });
 
 @injectable()
@@ -33,6 +46,15 @@ export class UserProfileRoute extends HttpRoute {
       responseSchema: zGetUserSessionResponseSchema,
       handler: this.getUserSession.bind(this),
     });
+
+    this.register({
+      method: HttpMethod.PATCH,
+      path: "/",
+      authenticated: true,
+      requestSchema: zSetActiveOrganizationRequestSchema,
+      responseSchema: zSetActiveOrganizationResponseSchema,
+      handler: this.setActiveOrganization.bind(this),
+    });
   }
 
   private async getUserSession({
@@ -53,7 +75,7 @@ export class UserProfileRoute extends HttpRoute {
       with: { organization: { columns: { metadata: false } } },
     });
 
-    let activeOrganization: IAuthentication["Organization"] | null = null;
+    let activeOrganization: IActiveOrganization | null = null;
 
     if (authenticationCtx.session.activeOrganizationId) {
       activeOrganization =
@@ -84,9 +106,9 @@ export class UserProfileRoute extends HttpRoute {
   }
 
   private serializeSession(
-    user: IAuthentication["Session"]["user"],
-    activeOrganization: IAuthentication["Organization"] | null,
-    organizations: IAuthentication["Organization"][],
+    user: ISelectUser,
+    activeOrganization: IActiveOrganization | null,
+    organizations: IActiveOrganization[],
   ): IzUserSesssionResponseMinimal {
     return {
       user: {
@@ -110,5 +132,39 @@ export class UserProfileRoute extends HttpRoute {
         createdAt: organization.createdAt,
       })),
     };
+  }
+
+  private async setActiveOrganization({
+    authentication,
+    data,
+    response,
+  }: RequestContext<
+    typeof zSetActiveOrganizationRequestSchema,
+    typeof zSetActiveOrganizationResponseSchema,
+    true
+  >) {
+    // Verify the user is actually a member of this organization
+    const membership = await this.postgres.client.query.memberSchema.findFirst({
+      where: ({ organizationId, userId }) =>
+        and(
+          eq(organizationId, data.body.organizationId),
+          eq(userId, authentication.user.id),
+        ),
+    });
+
+    if (!membership) {
+      return response.unsuccessful({
+        code: HttpError.FORBIDDEN,
+        message: "You are not a member of this organization",
+      });
+    }
+
+    // Stamp the active organization ID onto the current session row
+    await this.postgres.client
+      .update(sessionSchema)
+      .set({ activeOrganizationId: data.body.organizationId })
+      .where(eq(sessionSchema.token, authentication.session.token));
+
+    return response.success({ success: true });
   }
 }

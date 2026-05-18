@@ -13,7 +13,7 @@ import {
   type IzOrganizationFormCreate,
   zOrganizationFormCreate,
 } from "~/forms/organizations.form";
-import { authClient } from "~/lib/auth/client";
+import { organizationHttp } from "~/lib/http/organization.http";
 
 export default function CreateOrganizationForm() {
   const navigate = useNavigate();
@@ -31,24 +31,22 @@ export default function CreateOrganizationForm() {
   }
 
   async function handleSubmit(data: IzOrganizationFormCreate) {
-    await authClient.organization.create({
-      name: data.name,
-      slug: generateOrganizationSlug(data.name),
-      fetchOptions: {
-        onSuccess: async () => {
-          await queryClient.invalidateQueries({
-            queryKey: ["user", "session"],
-          });
-          await navigate({ to: "/organizations" });
-        },
-        onError: ({ error }) => {
-          toast.error("Failed to create organization", {
-            description: error.message,
-            richColors: true,
-          });
-        },
-      },
-    });
+    try {
+      await organizationHttp.createOrganization({
+        name: data.name,
+        slug: generateOrganizationSlug(data.name),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["user", "session"],
+      });
+      await navigate({ to: "/organizations" });
+    } catch (error) {
+      toast.error("Failed to create organization", {
+        description:
+          error instanceof Error ? error.message : "An error occurred",
+        richColors: true,
+      });
+    }
   }
 
   return (
