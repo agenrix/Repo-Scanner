@@ -91,6 +91,12 @@ interface IDeleteHttpOptions {
   pathParams?: Record<string, string | number>;
 }
 
+interface IPatchHttpOptions {
+  path: string;
+  headers?: HeadersInit;
+  pathParams?: Record<string, string | number>;
+}
+
 export function getHttpQueryKey(opts: IGetHttpOptions) {
   const url = replacePathParams(opts.path, opts.pathParams);
   const pathParamKeys = Object.entries(opts.pathParams ?? {})
@@ -174,5 +180,34 @@ export const useDeleteHttp = <TData>(opts: IDeleteHttpOptions) => {
   return useMutation({
     mutationKey: getHttpQueryKey(opts),
     mutationFn: () => deleteHttpHandler<TData>(opts),
+  });
+};
+
+export async function patchHttpHandler<TData, TVariables = unknown>(
+  opts: IPatchHttpOptions,
+  variables: TVariables,
+) {
+  const url = replacePathParams(opts.path, opts.pathParams);
+  const response = await api.patch(url, {
+    headers: opts.headers,
+    ...(variables === undefined ? {} : { json: variables }),
+    throwHttpErrors: false,
+  });
+  const responseJson = await parseApiResponse<TData>(response);
+
+  if (!responseJson.success) {
+    throw new ApiResponseError(responseJson.error, response.status);
+  }
+
+  return responseJson.data;
+}
+
+export const usePatchHttp = <TData, TVariables = unknown>(
+  opts: IPatchHttpOptions,
+) => {
+  return useMutation({
+    mutationKey: getHttpQueryKey(opts),
+    mutationFn: (variables: TVariables) =>
+      patchHttpHandler<TData, TVariables>(opts, variables),
   });
 };

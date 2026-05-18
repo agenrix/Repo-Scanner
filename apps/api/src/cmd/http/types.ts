@@ -1,9 +1,12 @@
+import type { ISelectSession, ISelectUser } from "@agenrix/pg/schema";
 import type { Context, Hono, MiddlewareHandler } from "hono";
-import type { IAuthentication } from "~/infrastructure/config/better-auth.config";
 
 export type IHttpVariables = {
   reqId: string;
-  authentication: IAuthentication["Session"] | null;
+  authentication: {
+    session: ISelectSession;
+    user: ISelectUser;
+  } | null;
 };
 
 export type IHttpBindings = {

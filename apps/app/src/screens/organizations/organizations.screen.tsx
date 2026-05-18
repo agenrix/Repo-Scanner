@@ -1,12 +1,15 @@
 import { PlusIcon } from "@phosphor-icons/react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { toast } from "sonner";
 import { SubmitButton } from "~/components/common/submit-button.component";
+import InviteTeammateForm from "~/components/forms/organization/invite-teammate.form.component";
 import * as AvatarComponent from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import * as SheetComponent from "~/components/ui/sheet";
 import { getSession } from "~/hooks/authentication/get-session.hook";
+import { userHttp } from "~/lib/http/user.http";
 
 export default function OrganizationsScreen() {
   const [launchingOrganizationId, setLaunchingOrganizationId] = React.useState<
@@ -14,7 +17,6 @@ export default function OrganizationsScreen() {
   >(null);
 
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const {
     data: { session },
@@ -30,19 +32,9 @@ export default function OrganizationsScreen() {
   const firstName = session.user.name.split(" ").at(0) ?? session.user.name;
 
   async function handleOrganizationLaunch(organizationId: string) {
-    // TODO: REMOVE LATER - Replaced by custom Drizzle Auth
-    // The endpoint /v1/user/session handles the active organization logic.
-    // For now, we will just simulate a success response since setting active org
-    // requires a new custom DB endpoint.
     setLaunchingOrganizationId(organizationId);
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      await queryClient.invalidateQueries({
-        queryKey: ["user", "session"],
-      });
-
+      await userHttp.setActiveOrganization(organizationId);
       await navigate({ to: "/" });
     } catch (error) {
       toast.error("Failed to launch organization", {
@@ -98,14 +90,41 @@ export default function OrganizationsScreen() {
                       </p>
                     </div>
 
-                    <SubmitButton
-                      isSubmitting={isLaunching}
-                      variant={"outline"}
-                      className="px-4"
-                      onClick={() => handleOrganizationLaunch(organization.id)}
-                    >
-                      Launch
-                    </SubmitButton>
+                    <div className="flex items-center gap-2">
+                      <SheetComponent.Sheet>
+                        <SheetComponent.SheetTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            Invite
+                          </Button>
+                        </SheetComponent.SheetTrigger>
+                        <SheetComponent.SheetContent side="right">
+                          <SheetComponent.SheetHeader>
+                            <SheetComponent.SheetTitle>
+                              Invite Teammate
+                            </SheetComponent.SheetTitle>
+                            <SheetComponent.SheetDescription>
+                              Send an email invitation to collaborate.
+                            </SheetComponent.SheetDescription>
+                          </SheetComponent.SheetHeader>
+                          <div className="mt-6">
+                            <InviteTeammateForm
+                              organizationId={organization.id}
+                            />
+                          </div>
+                        </SheetComponent.SheetContent>
+                      </SheetComponent.Sheet>
+
+                      <SubmitButton
+                        isSubmitting={isLaunching}
+                        variant={"outline"}
+                        className="px-4"
+                        onClick={() =>
+                          handleOrganizationLaunch(organization.id)
+                        }
+                      >
+                        Launch
+                      </SubmitButton>
+                    </div>
                   </div>
                 );
               })}

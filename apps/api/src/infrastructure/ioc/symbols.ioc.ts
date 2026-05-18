@@ -24,6 +24,10 @@ export const HTTP_SYMBOL = {
     RepoScans: {
       Root: Symbol.for("RepoScansRoute"),
     },
+
+    Organization: {
+      Root: Symbol.for("OrganizationRoute"),
+    },
   },
 
   Router: {
@@ -31,6 +35,7 @@ export const HTTP_SYMBOL = {
     User: Symbol.for("UserRouter"),
     Integrations: Symbol.for("IntegrationsRouter"),
     Authentication: Symbol.for("AuthenticationRouter"),
+    Organization: Symbol.for("OrganizationRouter"),
   },
 
   Middleware: {

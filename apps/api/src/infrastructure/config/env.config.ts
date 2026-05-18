@@ -37,6 +37,10 @@ export const env: IEnvSchema = validate(zEnvSchema, {
       appInstallationUrl: process.env.GITHUB_APP_INSTALLATION_URL as string,
     },
   },
+  email: {
+    resendApiKey: process.env.RESEND_API_KEY as string,
+    fromAddress: process.env.EMAIL_FROM_ADDRESS as string,
+  },
   persistence: {
     pg: {
       url: process.env.POSTGRES_URL as string,

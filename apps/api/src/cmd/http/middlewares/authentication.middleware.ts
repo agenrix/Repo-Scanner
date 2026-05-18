@@ -1,7 +1,5 @@
 import { sessionSchema, userSchema } from "@agenrix/pg/schema";
 import { eq } from "drizzle-orm";
-// TODO: REMOVE LATER - Replaced by custom Drizzle Auth
-// import { authentication } from "~/infrastructure/config/better-auth.config";
 import { getCookie } from "hono/cookie";
 import { inject, injectable } from "inversify";
 import { INFRASTRUCTURE_SYMBOL } from "~/infrastructure/ioc/symbols.ioc";

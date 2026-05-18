@@ -21,11 +21,15 @@ export class BootstrapRouter implements IHttpRouter {
 
     @inject(HTTP_SYMBOL.Route.RepoScans.Root)
     private readonly repoScansRoute: IHttpRoute,
+
+    @inject(HTTP_SYMBOL.Router.Organization)
+    private readonly organizationRouter: IHttpRouter,
   ) {}
   async init(path: string, app: IHttpApp): Promise<void> {
     await this.userRouter.init(`${path}/user`, app);
     await this.integrationsRouter.init(`${path}/integrations`, app);
     await this.authenticationRouter.init(`${path}/authentication`, app);
+    await this.organizationRouter.init(`${path}/organizations`, app);
     app.route(`${path}/repo_scans`, await this.repoScansRoute.init());
   }
 }

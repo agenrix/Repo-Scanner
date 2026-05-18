@@ -5,11 +5,13 @@ import type { IHttpRoute } from "~/cmd/http/route";
 import { BootstrapRouter, type IHttpRouter } from "~/cmd/http/router";
 import { AuthenticationRouter } from "~/cmd/http/routers/authentication.router";
 import { IntegrationsRouter } from "~/cmd/http/routers/integrations.router";
+import { OrganizationRouter } from "~/cmd/http/routers/organization.router";
 import { UserRouter } from "~/cmd/http/routers/user.router";
 import { AuthenticationRootRoute } from "~/cmd/http/routes/authentication/auth.route";
 import { GithubIntegrationCallbackRoute } from "~/cmd/http/routes/integrations/github/callback.github.integration.route";
 import { GithubIntegrationRoute } from "~/cmd/http/routes/integrations/github/github.integration.route";
 import { IntegrationsRoute } from "~/cmd/http/routes/integrations/integrations.route";
+import { OrganizationRoute } from "~/cmd/http/routes/organization/organization.route";
 import { RepoScansRoute } from "~/cmd/http/routes/repo-scans/repo-scans.route";
 import { UserProfileRoute } from "~/cmd/http/routes/user/session.user.route";
 import { HttpServer, type IHttpServer } from "~/cmd/http/server";
@@ -46,6 +48,9 @@ container
   .bind<IHttpRoute>(HTTP_SYMBOL.Route.Authentication.Root)
   .to(AuthenticationRootRoute);
 container.bind<IHttpRoute>(HTTP_SYMBOL.Route.RepoScans.Root).to(RepoScansRoute);
+container
+  .bind<IHttpRoute>(HTTP_SYMBOL.Route.Organization.Root)
+  .to(OrganizationRoute);
 
 // routers
 container.bind<IHttpRouter>(HTTP_SYMBOL.Router.Bootstrap).to(BootstrapRouter);
@@ -56,6 +61,9 @@ container
 container
   .bind<IHttpRouter>(HTTP_SYMBOL.Router.Authentication)
   .to(AuthenticationRouter);
+container
+  .bind<IHttpRouter>(HTTP_SYMBOL.Router.Organization)
+  .to(OrganizationRouter);
 
 // middlewares
 container

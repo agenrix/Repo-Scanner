@@ -20,6 +20,7 @@ interface HomeSidebarProps {
   user?: IUser;
   organizations?: IOrganization[];
   activeOrganization?: IOrganization | null;
+  onLogOut?: () => void | Promise<void>;
 }
 
 const platformLinks = [
@@ -66,6 +67,7 @@ export default function HomeSidebar({
   user,
   organizations,
   activeOrganization,
+  onLogOut,
 }: HomeSidebarProps) {
   const { toggleSidebar, state } = useSidebar();
   return (
@@ -162,6 +164,7 @@ export default function HomeSidebar({
                 }
               : undefined
           }
+          onLogOut={onLogOut}
         />
       </SidebarComponent.SidebarFooter>
     </SidebarComponent.Sidebar>

@@ -54,6 +54,11 @@ const zEnvSchemaIntegrations = z.object({
   github: zEnvSchemaGithubIntegration,
 });
 
+const zEnvSchemaEmail = z.object({
+  resendApiKey: z.string(),
+  fromAddress: z.string().email(),
+});
+
 export const zEnvSchema = z.object({
   name: z.string().default("@agenrix/api"),
   nodeEnv: z.enum(NodeEnv),
@@ -65,6 +70,7 @@ export const zEnvSchema = z.object({
   worker: zEnvSchemaWorker,
   oauth: zEnvSchemaOAuth,
   integrations: zEnvSchemaIntegrations,
+  email: zEnvSchemaEmail,
 });
 
 export type IEnvSchema = z.infer<typeof zEnvSchema>;

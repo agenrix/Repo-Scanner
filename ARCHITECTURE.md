@@ -120,7 +120,11 @@ To fix the performance issues, we built a custom, lightweight auth flow using **
     2. **Callback**: GitHub sends the user back to our API.
     3. **Processing**: We manually exchange the code for a token, fetch the user profile, and use Drizzle to `upsert` (Update or Insert) the user in our DB.
     4. **Session**: we generate a UUID session token, save it to the `session` table, and set it as an `httpOnly` cookie.
-- **Files**: `apps/api/src/cmd/http/routes/authentication/auth.route.ts`.
+    5. **Active Organization Launch**: Frontend calls `PATCH /v1/user/session` to stamp the selected `activeOrganizationId` onto the session table, allowing the TanStack Start protected router guard to pass.
+    6. **Sign-Out**: Frontend calls `POST /v1/authentication/sign-out` to delete the session token from the DB and clear the `session_token` cookie, immediately resetting the local QueryClient cache and redirecting the user to `/login`.
+- **Files**: 
+    * `apps/api/src/cmd/http/routes/authentication/auth.route.ts` (Core OAuth & Sign-out)
+    * `apps/api/src/cmd/http/routes/user/session.user.route.ts` (Active Organization patching)
 
 ---
 
@@ -196,49 +200,33 @@ window.location.href = `${env.VITE_API_URL}/v1/authentication/sign-in/github`;
 
 ---
 
-## 🛠️ Legacy Implementation: Better-Auth
+## 🛠️ Implementation Deep Dive: Organization & Team Features
 
-Before moving to our custom Drizzle auth, we used **Better-Auth**. It is important to understand this setup as some parts of the codebase still reference its data structures.
+After removing Better-Auth, we implemented our own Drizzle-based organization and invitation management system. This ensures tight control over multi-tenancy and data performance.
 
-### 📁 Folder 1: `apps/api/src/infrastructure/config` (The Config)
-Better-Auth was configured in `better-auth.config.ts`. It acted as a "Black Box" that handled all auth logic automatically.
-- **Key Feature**: The `adapter` linked Better-Auth directly to our Postgres database.
-- **Social Login**: GitHub was configured inside the `socialProviders` object.
+### 📁 Folder 1: `apps/api/src/cmd/http/routes/organization` (The Logic)
+We handle organization creation and teammate invitations here.
 
-```typescript
-export const authentication = createAuthenticationServerClient({
-  database: postgres, // Direct link to DB
-  socialProviders: {
-    github: {
-      clientId: env.oauth.github.clientId,
-      clientSecret: env.oauth.github.clientSecret,
-    },
-  },
-});
-```
+#### Step 1: Organization Creation
+Users can create an organization via `POST /v1/organizations`. 
+The system does two things inside a database transaction:
+1. Inserts the organization into the `organization` table.
+2. Automatically inserts the user who created it into the `member` table with the role of `admin`.
 
-### 📁 Folder 2: `apps/api/src/cmd/http` (The Wildcard Route)
-Better-Auth requires a "Catch-all" route. In `server.ts`, we mounted it so that any request starting with `/v1/authentication/*` would be handled by the library.
+#### Step 2: Teammate Invitations
+Admins can invite teammates via `POST /v1/organizations/:id/invitation`.
+The system validates that the user making the request is an `admin` of that organization, and then inserts a record into the `invitation` table with a `pending` status.
+
+### 📁 Folder 2: `apps/app/src/lib/http` (The Frontend Client)
+We use a custom wrapper around `ky` (found in `organization.http.ts`) to communicate with our custom backend instead of relying on external auth clients.
 
 ```typescript
-// Legacy server.ts logic
-this.app.on(["POST", "GET"], "/v1/authentication/*", (ctx) => {
-  return authentication.handler(ctx.req.raw);
-});
+// apps/app/src/lib/http/organization.http.ts
+export const organizationHttp = {
+  createOrganization: async (data: { name: string; slug: string }) => { ... },
+  inviteTeammate: async (organizationId: string, data: { email: string; role?: string }) => { ... },
+};
 ```
-
-### 📁 Folder 3: `apps/app/src/lib/auth` (The Client)
-On the frontend, we used `client.ts` to create an `authClient`. This client automatically knew how to talk to the backend catch-all route.
-
-```typescript
-// apps/app/src/lib/auth/client.ts
-export const authClient = createAuthClient({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-```
-
-### 📁 Folder 4: `apps/app/src/hooks` (The Hooks)
-The frontend would use hooks like `authClient.useSession()` to check if a user was logged in. This was easy to use but caused the performance bottlenecks (high latency) that led us to build the custom solution.
 
 ---
 
