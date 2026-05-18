@@ -1,6 +1,6 @@
 import { and, eq } from "@agenrix/pg/orm";
 import type { ISelectOrganization, ISelectUser } from "@agenrix/pg/schema";
-import { memberSchema, sessionSchema } from "@agenrix/pg/schema";
+import { sessionSchema } from "@agenrix/pg/schema";
 import { inject, injectable } from "inversify";
 
 type IActiveOrganization = Omit<ISelectOrganization, "metadata">;

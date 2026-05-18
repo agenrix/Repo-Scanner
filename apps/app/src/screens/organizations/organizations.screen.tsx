@@ -1,5 +1,5 @@
 import { PlusIcon } from "@phosphor-icons/react";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import React from "react";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ export default function OrganizationsScreen() {
   >(null);
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
     data: { session },
@@ -35,6 +36,7 @@ export default function OrganizationsScreen() {
     setLaunchingOrganizationId(organizationId);
     try {
       await userHttp.setActiveOrganization(organizationId);
+      await queryClient.invalidateQueries({ queryKey: ["user", "session"] });
       await navigate({ to: "/" });
     } catch (error) {
       toast.error("Failed to launch organization", {
